@@ -19,9 +19,8 @@ def request(request):
 
 
 def print_response(response):
-    print(f'status: {response.status_code}')
-    print(f'time: {response.elapsed}')
-    print(f'content: {response.raw}')
+    print(f'{response.method} {response.url}')
+    print(f'{response.status} {response.reason}')
 
     for name, value in response.headers.items():
         print(f'{name}: {value}')
@@ -30,7 +29,8 @@ def print_response(response):
 async def execute_request(cmd):
     for request in REQUESTS:
         if request.__name__ == cmd:
-            await request(ENV)
+            async with aiohttp.ClientSession() as session:
+                await request(ENV, session)
 
 
 async def interactive_mode():
@@ -46,9 +46,9 @@ def list_requests():
 
 
 @request
-async def get_state(env):
-    response = requests.get(f'{env["url"]}/config/state')
-    print_response(response)
+async def get_state(env, session):
+    async with session.get(f'{env["url"]}/config/state') as response:
+        print_response(response)
 
 
 async def main():
