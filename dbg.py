@@ -1,3 +1,4 @@
+import json
 import requests
 
 
@@ -16,7 +17,6 @@ def get_state(env):
 
 
 if __name__ == '__main__':
-    env = {
-        'url': 'http://127.0.0.1:9777'
-    }
+    with open('conf.env.json', 'r') as f:
+        env = json.load(f)
     get_state(env)
