@@ -4,6 +4,9 @@ import json
 import requests
 import functools
 import argparse
+from itertools import cycle
+from datetime import datetime, timedelta
+
 
 REQUESTS = set()
 with open('conf.env.json', 'r') as f:
@@ -21,15 +24,25 @@ def request(request):
 def print_response(response):
     print(f'{response.method} {response.url}')
     print(f'{response.status} {response.reason}')
-
     for name, value in response.headers.items():
         print(f'{name}: {value}')
+
+
+
+async def progress_bar():
+    start = datetime.now()
+    for bar in cycle(['\\', '-', '/', '|']):
+        elapsed = datetime.now() - start
+        print(f'in progress {bar} [{elapsed}]', end='\r')
+        await asyncio.sleep(0.1)
 
 
 async def execute_request(cmd):
     for request in REQUESTS:
         if request.__name__ == cmd:
+            asyncio.ensure_future(progress_bar())
             async with aiohttp.ClientSession() as session:
+                await asyncio.sleep(3)
                 await request(ENV, session)
 
 
