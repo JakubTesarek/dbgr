@@ -5,6 +5,7 @@ import requests
 import functools
 import argparse
 from dbg.progress_bar import ProgressBar
+from dbg.reporting import get_request_finish_tracer
 
 
 REQUESTS = set()
@@ -20,20 +21,14 @@ def request(request):
     return wrapper_decorator
 
 
-def print_response(response):
-    print(f'{response.method} {response.url}')
-    print(f'{response.status} {response.reason}')
-    for name, value in response.headers.items():
-        print(f'{name}: {value}')
-
-
 async def execute_request(cmd):
     for request in REQUESTS:
         if request.__name__ == cmd:
             progress_bar = ProgressBar()
-            async with aiohttp.ClientSession(
-                trace_configs=[progress_bar.get_tracer()]
-            ) as session:
+            async with aiohttp.ClientSession(trace_configs=[
+                progress_bar.get_tracer(),
+                get_request_finish_tracer()
+            ]) as session:
                 await request(ENV, session)
 
 
@@ -51,14 +46,12 @@ def list_requests():
 
 @request
 async def get_state(env, session):
-    async with session.get(f'{env["url"]}/config/state') as response:
-        print_response(response)
+    await session.get(f'{env["url"]}/config/state')
 
 
 @request
 async def slow_response(env, session):
-    async with session.get(f'http://slowwly.robertomurray.co.uk/delay/1000/url/http://slowwly.robertomurray.co.uk/delay/3000/url/http://www.google.co.uk') as response:
-        print_response(response)
+    await session.get(f'http://slowwly.robertomurray.co.uk/delay/1000/url/http://slowwly.robertomurray.co.uk/delay/3000/url/http://www.google.co.uk')
 
 
 async def main():
