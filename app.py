@@ -4,8 +4,7 @@ import json
 import requests
 import functools
 import argparse
-from itertools import cycle
-from datetime import datetime, timedelta
+from dbg.progress_bar import ProgressBar
 
 
 REQUESTS = set()
@@ -28,21 +27,13 @@ def print_response(response):
         print(f'{name}: {value}')
 
 
-
-async def progress_bar():
-    start = datetime.now()
-    for bar in cycle(['\\', '-', '/', '|']):
-        elapsed = datetime.now() - start
-        print(f'in progress {bar} [{elapsed}]', end='\r')
-        await asyncio.sleep(0.1)
-
-
 async def execute_request(cmd):
     for request in REQUESTS:
         if request.__name__ == cmd:
-            asyncio.ensure_future(progress_bar())
-            async with aiohttp.ClientSession() as session:
-                await asyncio.sleep(3)
+            progress_bar = ProgressBar()
+            async with aiohttp.ClientSession(
+                trace_configs=[progress_bar.get_tracer()]
+            ) as session:
                 await request(ENV, session)
 
 
@@ -61,6 +52,12 @@ def list_requests():
 @request
 async def get_state(env, session):
     async with session.get(f'{env["url"]}/config/state') as response:
+        print_response(response)
+
+
+@request
+async def slow_response(env, session):
+    async with session.get(f'http://slowwly.robertomurray.co.uk/delay/1000/url/http://slowwly.robertomurray.co.uk/delay/3000/url/http://www.google.co.uk') as response:
         print_response(response)
 
 
