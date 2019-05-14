@@ -1,11 +1,10 @@
 import asyncio
 import aiohttp
-import requests
 import functools
 import argparse
-from dbg.progress_bar import ProgressBar
-from dbg.reporting import get_request_finish_tracer
-from dbg.configuration import Configuration
+from dbgr.progress_bar import ProgressBar
+from dbgr.reporting import get_request_finish_tracer
+from dbgr.configuration import Configuration
 
 
 REQUESTS = set()
