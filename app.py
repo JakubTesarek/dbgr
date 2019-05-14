@@ -22,7 +22,7 @@ async def interactive_mode(configuration):
 
 
 def list_requests():
-    return '\n'.join([n.__name__ for n in REQUESTS])
+    return '\n'.join([f'{r.__module__}:{r.__name__}' for r in REQUESTS])
 
 
 async def main():
@@ -30,7 +30,7 @@ async def main():
     parser = argparse.ArgumentParser(
         description=__doc__,
         formatter_class=argparse.RawTextHelpFormatter,
-        epilog='\n'.join([n.__name__ for n in REQUESTS])
+        epilog=list_requests()
     )
     parser.add_argument('cmd', nargs='?', help='Name of a request to execute')
     args = parser.parse_args()
