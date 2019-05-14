@@ -27,7 +27,7 @@ def list_requests():
 
 
 async def main():
-    load_requests('requests.py')
+    load_requests()
     parser = argparse.ArgumentParser(
         description=__doc__,
         formatter_class=argparse.RawTextHelpFormatter,

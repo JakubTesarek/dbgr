@@ -1,15 +1,19 @@
 import functools
 import os
 import importlib.util
+import glob
 
 
 REQUESTS = set()
 
+def load_requests():
+    for module_path in glob.glob(f'{os.getcwd()}/*.py'):
+        print(module_path)
+        load_module(module_path)
 
-def load_requests(filename):
-    cwd = os.getcwd()
-    spec = importlib.util.spec_from_file_location('requests', f'{cwd}/{filename}'
-    )
+
+def load_module(module_path):
+    spec = importlib.util.spec_from_file_location('requests', module_path)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
 
