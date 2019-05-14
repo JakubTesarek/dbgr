@@ -2,16 +2,15 @@
 
 import asyncio
 import argparse
-from dbgr import REQUESTS, load_requests
+from dbgr import REQUESTS, load_requests, find_request
 from dbgr.configuration import Configuration
 from dbgr.session import get_session
 
 
 async def execute_request(cmd, configuration):
-    for request in REQUESTS:
-        if request.__name__ == cmd:
-            async with get_session() as session:
-                await request(configuration.conf, session)
+    request = find_request(cmd)
+    async with get_session() as session:
+        await request(configuration.conf, session)
 
 
 async def interactive_mode(configuration):
