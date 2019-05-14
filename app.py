@@ -2,8 +2,7 @@ import asyncio
 import aiohttp
 import functools
 import argparse
-from dbgr.progress_bar import ProgressBar
-from dbgr.reporting import get_request_finish_tracer
+from dbgr.reporting import ProgressBar, Reporter
 from dbgr.configuration import Configuration
 
 
@@ -22,9 +21,10 @@ async def execute_request(cmd, configuration):
     for request in REQUESTS:
         if request.__name__ == cmd:
             progress_bar = ProgressBar()
+            reporter = Reporter()
             async with aiohttp.ClientSession(trace_configs=[
                 progress_bar.get_tracer(),
-                get_request_finish_tracer()
+                reporter.get_tracer()
             ]) as session:
                 await request(configuration.conf, session)
 
