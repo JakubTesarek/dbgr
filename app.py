@@ -23,7 +23,7 @@ async def request_command(args):
 
 
 async def list_command(args):
-    return '\n'.join([f'{r.__module__}:{r.__name__}' for r in REQUESTS])
+    print('\n'.join([f'{r.__module__}:{r.__name__}' for r in REQUESTS]))
 
 
 async def execute_request(request):
