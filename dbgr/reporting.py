@@ -38,6 +38,7 @@ class Reporter():
     def get_tracer(self):
         tracer = aiohttp.TraceConfig()
         tracer.on_request_end.append(self.report_request_finished)
+        tracer.on_request_redirect.append(self.on_request_redirect)
         return tracer
 
     async def report_request_finished(self, session, trace_config_ctx, params):
@@ -48,3 +49,6 @@ class Reporter():
         print('< Headers:')
         for name, value in response.headers.items():
             print(f'<  {name}: {value}')
+
+    async def on_request_redirect(self, session, trace_config_ctx, params):
+        print(f'Redirect -> {params.url}')

@@ -51,6 +51,11 @@ async def slow_response(conf, session):
     await session.get(f'http://slowwly.robertomurray.co.uk/delay/1000/url/http://slowwly.robertomurray.co.uk/delay/3000/url/http://www.google.co.uk')
 
 
+@request
+async def google(conf, session):
+    await session.get(f'http://google.com')
+
+
 async def main():
     parser = argparse.ArgumentParser(
         description=__doc__,
