@@ -1,4 +1,6 @@
 import aiohttp
+import colorama
+
 
 def get_request_finish_tracer():
     tracer = aiohttp.TraceConfig()
@@ -7,10 +9,10 @@ def get_request_finish_tracer():
 
 
 async def report_request_finished(session, trace_config_ctx, params):
+    colorama.init(autoreset=True)
     response = params.response
-    print(f'{response.method} {response.url}')
-    print(f'{response.status} {response.reason}')
+    print(f'< {response.method} {response.url}')
+    print(f'< {response.status} {response.reason}')
+    print('< Headers:')
     for name, value in response.headers.items():
-        print(f'{name}: {value}')
-
-
+        print(f'<  {name}: {value}')
