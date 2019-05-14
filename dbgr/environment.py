@@ -2,7 +2,7 @@ import os
 import json
 import jinja2
 
-class Configuration():
+class Environment():
     def __init__(self, template_file):
         self.template_dir = f'{os.getcwd()}/env'
         self.load_template(template_file)
@@ -13,6 +13,6 @@ class Configuration():
         self.template = templateEnv.get_template(template_file)
 
     @property
-    def conf(self):
-        conf_json = self.template.render()
-        return json.loads(conf_json)
+    def env(self):
+        env_json = self.template.render()
+        return json.loads(env_json)

@@ -6,7 +6,7 @@ DBGR is a tool for testing and debugging HTTP APIs.
 import asyncio
 import argparse
 from dbgr import REQUESTS, load_requests, find_request
-from dbgr.configuration import Configuration
+from dbgr.environment import Environment
 from dbgr.session import get_session
 
 
@@ -27,10 +27,10 @@ async def list_command(args):
 
 
 async def execute_request(request):
-    configuration = Configuration('env.json')
+    environment = Environment('env.json')
     request = find_request(request)
     async with get_session() as session:
-        await request(configuration.conf, session)
+        await request(environment.env, session)
 
 
 async def main():
