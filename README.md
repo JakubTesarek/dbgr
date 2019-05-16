@@ -32,3 +32,6 @@ DBGR automatically loads all requests from all .py files in current directory wh
 
 ## Environment
 Environments enable you to define variables, eg. different urls, and then run your requests with different arguments. Your default environment is placed in `env.ini`. This is a file in ini format using (ExtendedInterpolation)[https://docs.python.org/3/library/configparser.html#configparser.ExtendedInterpolation].
+
+## Autocomplete
+DBGR supports autocomplete for commands and requests. You need to install and setup (argcomplete)[https://pypi.org/project/argcomplete/] according to documentation.

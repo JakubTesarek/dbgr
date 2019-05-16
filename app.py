@@ -1,10 +1,12 @@
 #!/usr/bin/env python
+# PYTHON_ARGCOMPLETE_OK
 '''
 DBGR is a tool for testing and debugging HTTP APIs.
 '''
 
 import asyncio
 import argparse
+import argcomplete
 from dbgr import REQUESTS, load_requests, find_request
 from dbgr.environment import Environment
 from dbgr.session import get_session
@@ -33,9 +35,35 @@ async def execute_request(request):
         await request(environment.env, session)
 
 
+class RequestsCompleter:
+    def __init__(self):
+        uniques = set()
+        duplicates = set()
+        options = set()
+        for r in REQUESTS:
+            options.add(f'{r.__module__}:{r.__name__}')
+            if r.__name__ not in duplicates:
+                if r.__name__ in uniques:
+                    duplicates.add(r.__name__)
+                    uniques.remove(r.__name__)
+                else:
+                    uniques.add(r.__name__)
+        self.choices = tuple(options.union(uniques))
+
+    def __call__(self, **kwargs):
+        return self.choices
+
+
+class ModulesCompleter:
+    def __init__(self):
+        self.choices = (r.__module__ for r in REQUESTS)
+
+    def __call__(self, **kwargs):
+        return self.choices
+
+
 async def main():
     load_requests()
-
     parser = argparse.ArgumentParser(
         prog='dbgr',
         description=__doc__,
@@ -55,16 +83,24 @@ async def main():
         aliases=['req', 'r'],
         help=request_command.__doc__
     )
-    req_parser.add_argument('request', help='Name of the request to execute')
+    req_parser.add_argument(
+        'request',
+        help='Name of the request to execute'
+    ).completer=RequestsCompleter()
     req_parser.set_defaults(func=request_command)
 
     list_parser = subparsers.add_parser(
         'list-requests',
         aliases=['list', 'l'],
         help=list_command.__doc__)
-    list_parser.add_argument('module', nargs='?', help='Filter requests by module')
+    list_parser.add_argument(
+        'module',
+        nargs='?',
+        help='Filter requests by module'
+    ).completer=ModulesCompleter()
     list_parser.set_defaults(func=list_command)
 
+    argcomplete.autocomplete(parser)
     args = parser.parse_args()
     if hasattr(args, 'func'):
         await args.func(args)
