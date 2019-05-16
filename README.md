@@ -29,3 +29,6 @@ async def get_example(env, session):
 And then you'll execute it with alternative name `$ dbgr r different_name`.
 
 DBGR automatically loads all requests from all .py files in current directory which can leads to collisions in names. Therefore you can execute the endpoint with fully qualified name including module name: `$ dbgr r module:function`. Module name is simply name of the file without extension.
+
+## Environment
+Environments enable you to define variables, eg. different urls, and then run your requests with different arguments. Your default environment is placed in `env.ini`. This is a file in ini format using (ExtendedInterpolation)[https://docs.python.org/3/library/configparser.html#configparser.ExtendedInterpolation].

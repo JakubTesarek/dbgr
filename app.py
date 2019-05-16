@@ -27,7 +27,7 @@ async def list_command(args):
 
 
 async def execute_request(request):
-    environment = Environment('env.json')
+    environment = Environment('env.ini')
     request = find_request(request)
     async with get_session() as session:
         await request(environment.env, session)
