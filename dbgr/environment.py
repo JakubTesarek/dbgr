@@ -3,9 +3,9 @@ import jinja2
 from configparser import ConfigParser, ExtendedInterpolation
 
 class Environment():
-    def __init__(self, template_file):
+    def __init__(self, env_name):
         self.env_dir = f'{os.getcwd()}'
-        self.load_template(template_file)
+        self.load_template(f'{env_name}.ini')
 
     def load_template(self, template_file):
         templateLoader = jinja2.FileSystemLoader(searchpath=self.env_dir)

@@ -13,22 +13,22 @@ from dbgr.session import get_session
 from dbgr.completion import RequestsCompleter, ModulesCompleter
 
 
-async def prepare_and_execute_request(cmd):
-    environment = Environment('env.ini')
+async def prepare_and_execute_request(request, args):
+    environment = Environment(args.env)
     session = get_session()
-    await execute_request(session, environment, cmd)
+    await execute_request(session, environment, request)
 
 
 async def interactive_command(args):
     while True:
-        cmd = input('> ')
-        if not cmd or cmd == 'exit':
+        request = input('> ')
+        if not request or request == 'exit':
             break
-        await prepare_and_execute_request(cmd)
+        await prepare_and_execute_request(request, args)
 
 
 async def request_command(args):
-    await prepare_and_execute_request(args.request)
+    await prepare_and_execute_request(args.request, args)
 
 
 async def list_command(args):
@@ -48,6 +48,10 @@ async def main():
         aliases=['int', 'i'],
         help=interactive_command.__doc__
     )
+    int_parser.add_argument(
+        '-e', '--env',
+        default='default',
+        help='environment that will be used')
     int_parser.set_defaults(func=interactive_command)
 
     req_parser = subparsers.add_parser(
@@ -59,6 +63,10 @@ async def main():
         'request',
         help='Name of the request to execute'
     ).completer=RequestsCompleter()
+    req_parser.add_argument(
+        '-e', '--env',
+        default='default',
+        help='environment that will be used')
     req_parser.set_defaults(func=request_command)
 
     list_parser = subparsers.add_parser(
