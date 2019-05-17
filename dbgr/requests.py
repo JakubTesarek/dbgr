@@ -46,7 +46,7 @@ def find_request(request_name):
        module, name = name.split(':', 1)
 
     adepts = set()
-    for r in REQUESTS:
+    for r in get_requests_list():
         if r.__name__ == name:
             if r.__module__ == module:
                 return r
