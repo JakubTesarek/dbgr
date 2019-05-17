@@ -6,6 +6,7 @@ from pygments import highlight, lexers, formatters
 import json
 from colorama import Style, Fore
 
+
 class ProgressBar():
     def start(self):
         asyncio.ensure_future(self.render())
@@ -59,14 +60,18 @@ class Reporter():
             print(f'{Style.DIM}<{Style.RESET_ALL}  {name}: {value}')
 
     async def print_response(self, response):
+        print(f'{Style.DIM}<')
+        print(
+            f'{Style.DIM}<{Style.RESET_ALL} {Style.BRIGHT}Content{Style.RESET_ALL}'
+            f'{Style.DIM}({response.headers["Content-Type"]}){Style.RESET_ALL}:'
+        )
         if 'application/json' in response.headers['Content-Type']:
-            print(f'{Style.DIM}<')
-            print(
-                f'{Style.DIM}<{Style.RESET_ALL} {Style.BRIGHT}Content{Style.RESET_ALL}'
-                f'{Style.DIM}(application/json){Style.RESET_ALL}:'
-            )
             output = json.dumps(await response.json(), sort_keys=True, indent=2)
             print(highlight(output, lexers.JsonLexer(), formatters.TerminalFormatter()))
+        if 'application/xml' in response.headers['Content-Type']:
+            output = await response.text()
+            print(highlight(output, lexers.XmlLexer(), formatters.TerminalFormatter()))
+
 
     async def report_request_finished(self, session, trace_config_ctx, params):
         response = params.response
