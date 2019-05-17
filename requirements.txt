@@ -2,3 +2,4 @@ aiohttp
 jinja2
 colorama
 argcomplete
+pygments
