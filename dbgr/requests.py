@@ -9,7 +9,7 @@ class RequestNotImplementsError(RequestNotFoundError): pass
 class AmbiguousRequestNameError(RequestNotFoundError): pass
 
 
-def get_requests_list():
+def get_requests():
     if REQUESTS is None:
         load_requests()
     return REQUESTS
@@ -50,7 +50,7 @@ def find_request(request_name):
        module, name = name.split(':', 1)
 
     adepts = set()
-    for r in get_requests_list():
+    for r in get_requests():
         if r.__name__ == name:
             if r.__module__ == module:
                 return r

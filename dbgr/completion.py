@@ -1,4 +1,4 @@
-from dbgr.requests import get_requests_list
+from dbgr.requests import get_requests
 
 
 class Completer:
@@ -19,7 +19,7 @@ class RequestsCompleter(Completer):
         uniques = set()
         duplicates = set()
         options = set()
-        for r in get_requests_list():
+        for r in get_requests():
             options.add(f'{r.__module__}:{r.__name__}')
             if r.__name__ not in duplicates:
                 if r.__name__ in uniques:
@@ -32,4 +32,4 @@ class RequestsCompleter(Completer):
 
 class ModulesCompleter(Completer):
     def get_choices(self):
-        return (r.__module__ for r in get_requests_list())
+        return (r.__module__ for r in get_requests())
