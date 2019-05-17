@@ -7,9 +7,16 @@ DBGR is a tool for testing and debugging HTTP APIs.
 import asyncio
 import argparse
 import argcomplete
-from dbgr import REQUESTS, load_requests, find_request
+from dbgr.requests import get_requests_list, execute_request
 from dbgr.environment import Environment
 from dbgr.session import get_session
+from dbgr.completion import RequestsCompleter, ModulesCompleter
+
+
+async def prepare_and_execute_request(cmd):
+    environment = Environment('env.ini')
+    session = get_session()
+    await execute_request(session, environment, cmd)
 
 
 async def interactive_command(args):
@@ -17,53 +24,18 @@ async def interactive_command(args):
         cmd = input('> ')
         if not cmd or cmd == 'exit':
             break
-        await execute_request(cmd)
+        await prepare_and_execute_request(cmd)
 
 
 async def request_command(args):
-    await execute_request(args.request)
+    await prepare_and_execute_request(args.request)
 
 
 async def list_command(args):
-    print('\n'.join([f'{r.__module__}:{r.__name__}' for r in REQUESTS]))
-
-
-async def execute_request(request):
-    environment = Environment('env.ini')
-    request = find_request(request)
-    async with get_session() as session:
-        await request(environment.env, session)
-
-
-class RequestsCompleter:
-    def __init__(self):
-        uniques = set()
-        duplicates = set()
-        options = set()
-        for r in REQUESTS:
-            options.add(f'{r.__module__}:{r.__name__}')
-            if r.__name__ not in duplicates:
-                if r.__name__ in uniques:
-                    duplicates.add(r.__name__)
-                    uniques.remove(r.__name__)
-                else:
-                    uniques.add(r.__name__)
-        self.choices = tuple(options.union(uniques))
-
-    def __call__(self, **kwargs):
-        return self.choices
-
-
-class ModulesCompleter:
-    def __init__(self):
-        self.choices = (r.__module__ for r in REQUESTS)
-
-    def __call__(self, **kwargs):
-        return self.choices
+    print('\n'.join([f'{r.__module__}:{r.__name__}' for r in get_requests_list()]))
 
 
 async def main():
-    load_requests()
     parser = argparse.ArgumentParser(
         prog='dbgr',
         description=__doc__,
