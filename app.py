@@ -7,6 +7,7 @@ DBGR is a tool for testing and debugging HTTP APIs.
 import asyncio
 import argparse
 import argcomplete
+import colorama
 from dbgr.requests import get_requests_list, execute_request
 from dbgr.environment import Environment
 from dbgr.session import get_session
@@ -20,6 +21,7 @@ async def prepare_and_execute_request(request, args):
 
 
 async def interactive_command(args):
+    print(f'{colorama.Style.DIM}Dbgr interactive mode; press ^C to exit.')
     while True:
         request = input('> ')
         await prepare_and_execute_request(request, args)
@@ -86,6 +88,7 @@ async def main():
 
     argcomplete.autocomplete(parser)
     args = parser.parse_args()
+    colorama.init(autoreset=True)
     if hasattr(args, 'func'):
         await args.func(args)
     else:
@@ -97,3 +100,5 @@ if __name__ == '__main__':
         exit(asyncio.run(main()))
     except KeyboardInterrupt:
         print('')
+    except Exception as e:
+        print(f'{colorama.Fore.RED}{e}')
