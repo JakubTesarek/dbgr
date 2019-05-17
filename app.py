@@ -30,7 +30,12 @@ async def request_command(args):
 
 
 async def list_command(args):
-    print('\n'.join([f'{r.__module__}:{r.__name__}' for r in get_requests_list()]))
+    last_module = None
+    for r in get_requests_list():
+        if r.__module__ != last_module:
+            print(f'{r.__module__}:')
+        last_module = r.__module__
+        print(f' - {r.__name__}')
 
 
 async def main():
