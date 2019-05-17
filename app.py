@@ -22,8 +22,6 @@ async def prepare_and_execute_request(request, args):
 async def interactive_command(args):
     while True:
         request = input('> ')
-        if not request or request == 'exit':
-            break
         await prepare_and_execute_request(request, args)
 
 
@@ -41,7 +39,7 @@ async def main():
         description=__doc__,
         formatter_class=argparse.RawTextHelpFormatter
     )
-    subparsers = parser.add_subparsers(help='command to execute')
+    subparsers = parser.add_subparsers(help='Command to execute')
 
     int_parser = subparsers.add_parser(
         'interactive',
@@ -51,7 +49,7 @@ async def main():
     int_parser.add_argument(
         '-e', '--env',
         default='default',
-        help='environment that will be used')
+        help='Environment that will be used (default: "default"')
     int_parser.set_defaults(func=interactive_command)
 
     req_parser = subparsers.add_parser(
@@ -66,7 +64,7 @@ async def main():
     req_parser.add_argument(
         '-e', '--env',
         default='default',
-        help='environment that will be used')
+        help='Environment that will be used')
     req_parser.set_defaults(func=request_command)
 
     list_parser = subparsers.add_parser(
