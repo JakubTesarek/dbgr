@@ -8,16 +8,21 @@ import asyncio
 import argparse
 import argcomplete
 import colorama
-from dbgr.requests import get_requests_list, execute_request
+from dbgr.requests import get_requests_list, execute_request, RequestNotFoundError
 from dbgr.environment import Environment
 from dbgr.session import get_session
 from dbgr.completion import RequestsCompleter, ModulesCompleter
 
 
 async def prepare_and_execute_request(request, args):
-    environment = Environment(args.env)
-    session = get_session()
-    await execute_request(session, environment, request)
+    try:
+        environment = Environment(args.env)
+        session = get_session()
+        await execute_request(session, environment, request)
+    except Exception as e:
+        print(f'{colorama.Fore.RED}{e}')
+    finally:
+        await session.close()
 
 
 async def interactive_command(args):

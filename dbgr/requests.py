@@ -4,6 +4,10 @@ import glob
 
 REQUESTS = None
 
+class RequestNotFoundError(ValueError): pass
+class RequestNotImplementsError(RequestNotFoundError): pass
+class AmbiguousRequestNameError(RequestNotFoundError): pass
+
 
 def get_requests_list():
     if REQUESTS is None:
@@ -55,5 +59,8 @@ def find_request(request_name):
     if len(adepts) == 1:
         return adepts.pop()
     if len(adepts) == 0:
-        raise Exception(f'Request {request_name} was not found')
-    raise Exception(f'Found multipte requests for name {request_name}')
+        raise RequestNotImplementsError(f'Request "{request_name}" was not found.')
+    raise AmbiguousRequestNameError(
+        f'Request "{request_name}" found in multiple modules: '
+        f'{", ".join([r.__module__ for r in adepts])}'
+    )
