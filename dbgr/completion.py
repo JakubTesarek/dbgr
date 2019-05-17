@@ -1,8 +1,21 @@
 from dbgr.requests import get_requests_list
 
 
-class RequestsCompleter:
+class Completer:
     def __init__(self):
+        self.choices = None
+    
+    def __call__(self, **kwargs):
+        if not self.choices:
+            self.choices = self.get_choices()
+        return self.choices
+
+    def get_choices(self):
+        raise NotImplementedError(f'{__name__} needs to implemented in subclass')
+    
+
+class RequestsCompleter(Completer):
+    def get_choices(self):
         uniques = set()
         duplicates = set()
         options = set()
@@ -14,15 +27,9 @@ class RequestsCompleter:
                     uniques.remove(r.__name__)
                 else:
                     uniques.add(r.__name__)
-        self.choices = tuple(options.union(uniques))
-
-    def __call__(self, **kwargs):
-        return self.choices
+        return tuple(options.union(uniques))
 
 
-class ModulesCompleter:
-    def __init__(self):
-        self.choices = (r.__module__ for r in get_requests_list())
-
-    def __call__(self, **kwargs):
-        return self.choices
+class ModulesCompleter(Completer):
+    def get_choices(self):
+        return (r.__module__ for r in get_requests_list())
