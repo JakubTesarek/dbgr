@@ -4,7 +4,7 @@ from dbgr.requests import get_requests_names
 class Completer:
     def __init__(self):
         self.choices = None
-    
+
     def __call__(self, **kwargs):
         if not self.choices:
             self.choices = self.get_choices()
@@ -12,7 +12,7 @@ class Completer:
 
     def get_choices(self):
         raise NotImplementedError(f'"{__name__}" needs to be implemented in subclass')
-    
+
 
 class RequestsCompleter(Completer):
     def get_choices(self):

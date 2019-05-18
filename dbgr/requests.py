@@ -13,14 +13,14 @@ class DuplicateRequestNameError(ValueError): pass
 
 
 def validate_request_name(request):
-    if not request.__name__.isidentifier():
+    if not request.name.isidentifier():
         raise InvalidRequestNameError(
-            f'"{request.__module__}:{request.__name__}" is not valid request identifier. '
+            f'"{request.module}:{request.name}" is not valid request identifier. '
             f'Name can containt only letters, numbers and/or underscore'
         )
-    if request.__name__ in get_requests_names().get(request.__module__, set()):
+    if request.name in get_requests_names().get(request.module, set()):
         raise DuplicateRequestNameError(
-            f'"{request.__name__}" is already defined in module {request.__module__}'
+            f'"{request.name}" is already defined in module {request.module}'
         )
 
 
@@ -62,9 +62,9 @@ def load_requests():
 def register_request(request):
     validate_request_name(request)
     _REQUESTS.add(request)
-    if request.__module__ not in _REQUESTS_NAMES:
-        _REQUESTS_NAMES[request.__module__] = set()
-    _REQUESTS_NAMES[request.__module__].add(request.__name__)
+    if request.module not in _REQUESTS_NAMES:
+        _REQUESTS_NAMES[request.module] = set()
+    _REQUESTS_NAMES[request.module].add(request.name)
 
 
 def find_request(request_name):
