@@ -1,4 +1,4 @@
-from dbgr.requests import get_requests
+from dbgr.requests import get_requests_names
 
 
 class Completer:
@@ -11,25 +11,24 @@ class Completer:
         return self.choices
 
     def get_choices(self):
-        raise NotImplementedError(f'{__name__} needs to implemented in subclass')
+        raise NotImplementedError(f'"{__name__}" needs to be implemented in subclass')
     
 
 class RequestsCompleter(Completer):
     def get_choices(self):
-        uniques = set()
-        duplicates = set()
-        options = set()
-        for r in get_requests():
-            options.add(f'{r.__module__}:{r.__name__}')
-            if r.__name__ not in duplicates:
-                if r.__name__ in uniques:
-                    duplicates.add(r.__name__)
-                    uniques.remove(r.__name__)
-                else:
-                    uniques.add(r.__name__)
+        uniques, duplicates, options = set(), set(), set()
+        for module, requests in get_requests_names().items():
+            for name in requests:
+                options.add(f'{module}:{name}')
+                if name not in duplicates:
+                    if name in uniques:
+                        duplicates.add(name)
+                        uniques.remove(name)
+                    else:
+                        uniques.add(name)
         return tuple(options.union(uniques))
 
 
 class ModulesCompleter(Completer):
     def get_choices(self):
-        return (r.__module__ for r in get_requests())
+        return tuple(get_requests_names().keys())

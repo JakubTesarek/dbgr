@@ -8,7 +8,7 @@ import asyncio
 import argparse
 import argcomplete
 import colorama
-from dbgr.requests import get_requests, execute_request, RequestNotFoundError
+from dbgr.requests import get_requests_names, execute_request, RequestNotFoundError
 from dbgr.environment import Environment
 from dbgr.session import get_session
 from dbgr.completion import RequestsCompleter, ModulesCompleter
@@ -37,13 +37,10 @@ async def request_command(args):
 
 
 async def list_command(args):
-    last_module = None
-    for r in sorted(list(get_requests()), key=lambda r: r.__module__):
-        if args.module is None or r.__module__ == args.module:
-            if r.__module__ != last_module:
-                print(f'{r.__module__}:')
-            last_module = r.__module__
-            print(f' - {r.__name__}')
+    for module, requests in get_requests_names().items():
+        print(f'{colorama.Style.BRIGHT}{module}:')
+        for name in requests:
+            print(f' - {name}')
 
 
 async def main():
