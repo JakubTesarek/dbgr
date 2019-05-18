@@ -68,9 +68,12 @@ class Reporter():
         if 'application/json' in response.headers['Content-Type']:
             output = json.dumps(await response.json(), sort_keys=True, indent=2)
             print(highlight(output, lexers.JsonLexer(), formatters.TerminalFormatter()))
-        if 'application/xml' in response.headers['Content-Type']:
+        elif 'application/xml' in response.headers['Content-Type']:
             output = await response.text()
             print(highlight(output, lexers.XmlLexer(), formatters.TerminalFormatter()))
+        elif 'text/plain' in response.headers['Content-Type']:
+            output = await response.text()
+            print(output)
 
 
     async def report_request_finished(self, session, trace_config_ctx, params):
