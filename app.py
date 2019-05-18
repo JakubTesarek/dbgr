@@ -16,8 +16,8 @@ from dbgr.completion import RequestsCompleter, ModulesCompleter
 
 async def prepare_and_execute_request(request, args):
     try:
-        environment = Environment(args.env)
         session = get_session()
+        environment = Environment(args.env, session)
         await execute_request(session, environment, request)
     except Exception as e:
         print(f'{colorama.Fore.RED}{e}')

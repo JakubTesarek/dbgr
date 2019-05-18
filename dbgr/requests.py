@@ -38,7 +38,7 @@ def get_requests_names():
 async def execute_request(session, environment, request):
     request = find_request(request)
     async with session as s:
-        await request(environment.env, s)
+        await request(environment, s)
 
 
 def extract_module_name(module_path):
