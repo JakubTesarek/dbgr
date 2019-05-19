@@ -29,6 +29,7 @@ def get_requests():
         load_requests()
     return _REQUESTS
 
+
 def get_requests_names():
     if _REQUESTS is None:
         load_requests()
@@ -37,8 +38,7 @@ def get_requests_names():
 
 async def execute_request(session, environment, request):
     request = find_request(request)
-    async with session as s:
-        await request(environment, s)
+    return await request(environment, session)
 
 
 def extract_module_name(module_path):
@@ -63,8 +63,8 @@ def register_request(request):
     validate_request_name(request)
     _REQUESTS.add(request)
     if request.module not in _REQUESTS_NAMES:
-        _REQUESTS_NAMES[request.module] = set()
-    _REQUESTS_NAMES[request.module].add(request.name)
+        _REQUESTS_NAMES[request.module] = {}
+    _REQUESTS_NAMES[request.module][request.name] = request
 
 
 def find_request(request_name):

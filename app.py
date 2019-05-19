@@ -4,6 +4,7 @@
 DBGR is a tool for testing and debugging HTTP APIs.
 '''
 
+import readline
 import asyncio
 import argparse
 import argcomplete
@@ -17,7 +18,7 @@ from dbgr.completion import RequestsCompleter, ModulesCompleter
 async def prepare_and_execute_request(request, args):
     try:
         session = get_session()
-        environment = Environment(args.env, session)
+        environment = Environment(args.env)
         await execute_request(session, environment, request)
     except Exception as e:
         print(f'{colorama.Fore.RED}{e}')
@@ -38,9 +39,12 @@ async def request_command(args):
 
 async def list_command(args):
     for module, requests in get_requests_names().items():
-        print(f'{colorama.Style.BRIGHT}{module}:')
-        for name in requests:
-            print(f' - {name}')
+        if not args.module or module == args.module:
+            print(f'{colorama.Style.BRIGHT}{module}:')
+            for name, request in requests.items():
+                print(f' - {name}')
+                if request.__doc__:
+                    print(f'   {colorama.Style.DIM}{request.__doc__}')
 
 
 async def main():

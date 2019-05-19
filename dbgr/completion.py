@@ -18,7 +18,7 @@ class RequestsCompleter(Completer):
     def get_choices(self):
         uniques, duplicates, options = set(), set(), set()
         for module, requests in get_requests_names().items():
-            for name in requests:
+            for name in requests.keys():
                 options.add(f'{module}:{name}')
                 if name not in duplicates:
                     if name in uniques:

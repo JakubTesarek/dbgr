@@ -4,7 +4,6 @@ from configparser import ConfigParser, ExtendedInterpolation
 
 
 class Environment(ConfigParser):
-    def __init__(self, env_name, session):
+    def __init__(self, env_name):
         super().__init__(interpolation=ExtendedInterpolation())
-        self.session = session
         self.read(f'{env_name}.ini')
