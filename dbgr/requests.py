@@ -3,7 +3,6 @@ import importlib.util
 import glob
 
 _REQUESTS = None
-_REQUESTS_NAMES = {}
 
 class RequestNotFoundError(ValueError): pass
 class RequestNotImplementsError(RequestNotFoundError): pass
@@ -18,7 +17,7 @@ def validate_request_name(request):
             f'"{request.module}:{request.name}" is not valid request identifier. '
             f'Name can containt only letters, numbers and/or underscore'
         )
-    if request.name in get_requests_names().get(request.module, set()):
+    if request.name in get_requests().get(request.module, set()):
         raise DuplicateRequestNameError(
             f'"{request.name}" is already defined in module {request.module}'
         )
@@ -28,12 +27,6 @@ def get_requests():
     if _REQUESTS is None:
         load_requests()
     return _REQUESTS
-
-
-def get_requests_names():
-    if _REQUESTS is None:
-        load_requests()
-    return _REQUESTS_NAMES
 
 
 async def execute_request(session, environment, request):
@@ -54,37 +47,45 @@ def load_module(module_path):
 
 def load_requests():
     global _REQUESTS
-    _REQUESTS = set()
+    _REQUESTS = {}
     for module_path in glob.glob(f'{os.getcwd()}/*.py'):
         load_module(module_path)
 
 
 def register_request(request):
     validate_request_name(request)
-    _REQUESTS.add(request)
-    if request.module not in _REQUESTS_NAMES:
-        _REQUESTS_NAMES[request.module] = {}
-    _REQUESTS_NAMES[request.module][request.name] = request
+    if request.module not in _REQUESTS:
+        _REQUESTS[request.module] = {}
+    _REQUESTS[request.module][request.name] = request
 
 
 def find_request(request_name):
-    name = request_name
+    request = request_name
     module = None
-    if ':' in name:
-       module, name = name.split(':', 1)
+    if ':' in request:
+       module, request = name.split(':', 1)
 
-    adepts = set()
-    for r in get_requests():
-        if r.__name__ == name:
-            if r.__module__ == module:
-                return r
-            elif module is None:
-                adepts.add(r)
-    if len(adepts) == 1:
-        return adepts.pop()
-    if len(adepts) == 0:
-        raise RequestNotImplementsError(f'Request "{request_name}" was not found.')
-    raise AmbiguousRequestNameError(
-        f'Request "{request_name}" found in multiple modules: '
-        f'{", ".join([r.__module__ for r in adepts])}'
-    )
+    requests = get_requests()
+    if module:
+        if module not in requests:
+            raise RequestNotImplementsError(f'Module "{module}" does not exist.')
+        if request not in requests[module]:
+            raise RequestNotImplementsError(f'Request "{request_name}" does not exist.')
+        return requests[module][request]
+    else:
+        adepts = set()
+        for _, requests in requests.items():
+            for _, r in requests.items():
+                if r.name == request:
+                    if r.module == module:
+                        return r
+                    elif module is None:
+                        adepts.add(r)
+        if len(adepts) == 1:
+            return adepts.pop()
+        if len(adepts) == 0:
+            raise RequestNotImplementsError(f'Request "{request_name}" does not exist')
+        raise AmbiguousRequestNameError(
+            f'Request "{request_name}" found in multiple modules: '
+            f'{", ".join([r.module for r in adepts])}'
+        )
