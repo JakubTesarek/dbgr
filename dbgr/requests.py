@@ -1,6 +1,8 @@
+import colorama
 import os
 import importlib.util
 import glob
+from dataclasses import dataclass
 
 _REQUESTS = None
 
@@ -9,6 +11,12 @@ class RequestNotImplementsError(RequestNotFoundError): pass
 class AmbiguousRequestNameError(RequestNotFoundError): pass
 class InvalidRequestNameError(ValueError): pass
 class DuplicateRequestNameError(ValueError): pass
+
+
+@dataclass
+class Result:
+    value: object
+    cached: bool = False
 
 
 def validate_request_name(request):
@@ -31,8 +39,16 @@ def get_requests():
 
 async def execute_request(session, environment, request):
     request = find_request(request)
-    return await request(environment, session)
-
+    result = await request(environment, session)
+    
+    if result.value is None:
+        return
+    elif result.cached:
+        print(f'{colorama.Style.BRIGHT}Result{colorama.Style.RESET_ALL} (from cache):')
+    else:
+        print(f'{colorama.Style.BRIGHT}Result:')
+    print(result.value)
+    return result.value
 
 def extract_module_name(module_path):
     return os.path.splitext(os.path.basename(module_path))[0]
