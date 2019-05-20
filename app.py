@@ -9,6 +9,8 @@ import asyncio
 import argparse
 import argcomplete
 import colorama
+import sys
+import traceback
 from dbgr.requests import get_requests, execute_request, RequestNotFoundError
 from dbgr.environment import Environment
 from dbgr.session import get_session
@@ -20,6 +22,12 @@ async def prepare_and_execute_request(request, args):
         session = get_session()
         environment = Environment(args.env)
         await execute_request(session, environment, request)
+    except AssertionError as e:
+        _, _, tb = sys.exc_info()
+        tb_info = traceback.extract_tb(tb)
+        filename, line, func, text = tb_info[-1]
+        print(f'{colorama.Fore.RED}Assertion error in {filename}:{line}:')
+        print(f'{colorama.Fore.RED}{text}')
     except Exception as e:
         print(f'{colorama.Fore.RED}{e}')
     finally:

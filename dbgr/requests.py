@@ -3,6 +3,7 @@ import os
 import importlib.util
 import glob
 from dataclasses import dataclass
+from pprint import pprint
 
 _REQUESTS = None
 
@@ -17,6 +18,12 @@ class DuplicateRequestNameError(ValueError): pass
 class Result:
     value: object
     cached: bool = False
+
+    def pprint(self):
+        pprint(self.value)
+
+    def has_value(self):
+        return self.value is not None
 
 
 def validate_request_name(request):
@@ -40,15 +47,22 @@ def get_requests():
 async def execute_request(session, environment, request):
     request = find_request(request)
     result = await request(environment, session)
-    
-    if result.value is None:
-        return
-    elif result.cached:
-        print(f'{colorama.Style.BRIGHT}Result{colorama.Style.RESET_ALL} (from cache):')
-    else:
-        print(f'{colorama.Style.BRIGHT}Result:')
-    print(result.value)
-    return result.value
+
+    if result.has_value():
+        if result.cached:
+            print(
+                f'{colorama.Style.BRIGHT}Result{colorama.Style.RESET_ALL} '
+                f'{colorama.Style.DIM}({type(result.value).__name__}, from cache)'
+                f'{colorama.Style.RESET_ALL}:'
+            )
+        else:
+            print(
+                f'{colorama.Style.BRIGHT}Result{colorama.Style.RESET_ALL} '
+                f'{colorama.Style.DIM}({type(result.value).__name__})'
+                f'{colorama.Style.RESET_ALL}:'
+            )
+        result.pprint()
+        return result.value
 
 def extract_module_name(module_path):
     return os.path.splitext(os.path.basename(module_path))[0]
