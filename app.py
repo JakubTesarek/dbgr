@@ -53,6 +53,13 @@ async def list_command(args):
                 print(f' - {name}')
                 if request.doc:
                     print(f'   {colorama.Style.DIM}{request.doc}')
+                if request.extra_arguments:
+                    print(f'   {colorama.Style.DIM}Arguments:')
+                    for name, default in request.extra_arguments.items():
+                        if default is not None:
+                            print(f'    {colorama.Style.DIM}- {name} [default: {default}]')
+                        else:
+                            print(f'    {colorama.Style.DIM}- {name}')
 
 
 async def main():

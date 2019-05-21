@@ -1,3 +1,4 @@
+import inspect
 import colorama
 import os
 import importlib.util
@@ -48,7 +49,16 @@ class Request:
 
     @property
     def doc(self):
-        return self.request.__doc__
+        if self.request.__doc__ is not None:
+            return self.request.__doc__.strip()
+
+    @property
+    def extra_arguments(self):
+        args_spec = inspect.getargspec(self.request)
+        arguments = args_spec.args[2:] # Remove env and session
+        defaults = list(args_spec.defaults or [])
+        defaults = [None] * (len(arguments) - len(defaults)) + defaults
+        return dict(zip(arguments, defaults))
 
     async def __call__(self, *args, **kwargs ):
         value = await self.request(*args, **kwargs)
