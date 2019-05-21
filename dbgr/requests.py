@@ -19,23 +19,51 @@ class Result:
     value: object
     cached: bool = False
 
-    def pprint(self):
-        pprint(self.value)
+    def print(self):
+        if self.value is not None:
+            if self.cached:
+                print(
+                    f'{colorama.Style.BRIGHT}Result{colorama.Style.RESET_ALL} '
+                    f'{colorama.Style.DIM}({type(self.value).__name__}, from cache)'
+                    f'{colorama.Style.RESET_ALL}:'
+                )
+            else:
+                print(
+                    f'{colorama.Style.BRIGHT}Result{colorama.Style.RESET_ALL} '
+                    f'{colorama.Style.DIM}({type(self.value).__name__})'
+                    f'{colorama.Style.RESET_ALL}:'
+                )
+            pprint(self.value)
 
-    def has_value(self):
-        return self.value is not None
 
+class Request:
+    def __init__(self, request, name=None, cache=None):
+        self.name = name if name is not None else request.__name__
+        self.request = request
+        self.validate_name()
 
-def validate_request_name(request):
-    if not request.name.isidentifier():
-        raise InvalidRequestNameError(
-            f'"{request.module}:{request.name}" is not valid request identifier. '
-            f'Name can containt only letters, numbers and/or underscore'
-        )
-    if request.name in get_requests().get(request.module, set()):
-        raise DuplicateRequestNameError(
-            f'"{request.name}" is already defined in module {request.module}'
-        )
+    @property
+    def module(self):
+        return self.request.__module__
+
+    @property
+    def doc(self):
+        return self.request.__doc__
+
+    async def __call__(self, *args, **kwargs ):
+        value = await self.request(*args, **kwargs)
+        return Result(value)
+
+    def validate_name(self):
+        if not self.name.isidentifier():
+            raise InvalidRequestNameError(
+                f'"{self.module}:{self.name}" is not valid request identifier. '
+                f'Name can containt only letters, numbers and/or underscore'
+            )
+        if self.name in get_requests().get(self.module, set()):
+            raise DuplicateRequestNameError(
+                f'"{self.name}" is already defined in module {self.module}'
+            )
 
 
 def get_requests():
@@ -47,22 +75,9 @@ def get_requests():
 async def execute_request(session, environment, request):
     request = find_request(request)
     result = await request(environment, session)
+    result.print()
+    return result.value
 
-    if result.has_value():
-        if result.cached:
-            print(
-                f'{colorama.Style.BRIGHT}Result{colorama.Style.RESET_ALL} '
-                f'{colorama.Style.DIM}({type(result.value).__name__}, from cache)'
-                f'{colorama.Style.RESET_ALL}:'
-            )
-        else:
-            print(
-                f'{colorama.Style.BRIGHT}Result{colorama.Style.RESET_ALL} '
-                f'{colorama.Style.DIM}({type(result.value).__name__})'
-                f'{colorama.Style.RESET_ALL}:'
-            )
-        result.pprint()
-        return result.value
 
 def extract_module_name(module_path):
     return os.path.splitext(os.path.basename(module_path))[0]
@@ -83,7 +98,6 @@ def load_requests():
 
 
 def register_request(request):
-    validate_request_name(request)
     if request.module not in _REQUESTS:
         _REQUESTS[request.module] = {}
     _REQUESTS[request.module][request.name] = request
