@@ -109,12 +109,14 @@ class Request:
             )
         return arguments
 
-    async def __call__(self, env, session, use_defaults=False, kwargs={}):
+    async def __call__(
+        self, env, session, use_defaults=False, cache=True, kwargs={}
+    ):
         arguments = self.resolve_arguments(use_defaults, kwargs)
         if self.cache:
             cached = True
             key = (self.name, self.module, frozenset(arguments))
-            if key not in _CACHE:
+            if key not in _CACHE or cache == False:
                 cached = False
                 _CACHE[key] = await self.request(env, session, **arguments)
             return Result(_CACHE[key], cached)
@@ -150,9 +152,12 @@ def parse_cmd_arguments(args):
     return result
 
 
-async def execute_request(session, environment, request, use_defaults=False, **kwargs):
+async def execute_request(
+    session, environment, request, use_defaults=False, cache=True, **kwargs
+):
     request = find_request(request)
-    result = await request(environment, session, use_defaults=use_defaults, kwargs=kwargs)
+    result = await request(
+        environment, session, use_defaults=use_defaults, cache, kwargs=kwargs)
     result.print()
     return result.value
 
