@@ -12,7 +12,7 @@ async def get_example(env, session):
     await session.get('http://example.com')
 ```
 
-This is your first request. Next you need an environment that you will run this request againts. Create `default.ini`. It has to contain one section called `[DEFAULT]`, otherwise you can keep it empty:
+This is your first request. Next you need an environment in which you can run this. Create another file called `default.ini`. It has to contain only one section called `[DEFAULT]`, otherwise you can keep it empty:
 
 ```
 [DEFAULT]
@@ -22,7 +22,7 @@ Now you can execute the request with `$ dbgr request get_example` or shorter `$ 
 
 
 ## Requests
-DBGR request is a function decorated with `@dbgr.request`. In it simples form it accepts two arguments. First agument is the environment it was executed in. The second argument is a instance of `aiohttp.ClientSession`. You don't have to return or log anything from your request. The ClientSession does all logging automatically.
+DBGR request is a function decorated with `@dbgr.request`. In its simplest form it accepts two arguments. First agument is the environment it was executed in. The second argument is an instance of `aiohttp.ClientSession`. You don't have to return or log anything from your request. The ClientSession does all logging automatically.
 
 ### Names
 By default you execute your request with `$ dbgr r <function_name>`. Optinally you can change the name of the request with an argument:
@@ -37,70 +37,73 @@ And then you'll execute it with its alternative name `$ dbgr r different_name`.
 
 > Name of a request can contain only letters, numbers and/or underscores. Names are case sensitive.
 
-DBGR automatically loads requests from all .py files in current directory. This can lead to collisions in names. Therefore you can execute the endpoint with fully qualified name including module name: `$ dbgr r module:function`. Module name is simply name of the file without extension.
+DBGR automatically loads requests from all .py files in working directory. This can lead to collisions in names. Therefore you can execute the endpoint with fully qualified name including module name: `$ dbgr r module:function`. Module name is simply the name of the file without extension.
 
 ## Arguments
 When defining your request, you can specify any number of arguments that it will accept (besides env and session). These arguments will be filled with values specified when you call your request. If you don't provide them in the terminal, DBGR will prompt you for value. You can also define default values for some or all arguments.
 
 ```
 @request
-async def many_arguments(env, session, a1, a2, a3='default'):
+async def many_arguments(env, session, arg1, arg2, arg3='default'):
     pass
 ```
 
-When you call this request from terminal, you will be prompted for all 3 arguments. For a3 you will be offered to use default value:
+When you call this request from terminal, you will be prompted for all 3 arguments. For `a3` you will be offered to use default value:
 
 ```
 $ dbgr r many_arguments
-a1:
-a2:
-a3 [default]:
+arg1:
+arg2:
+arg3 [default]:
 ```
 
-You can provide some values when you execute your request with `-a` or `--arg`:
+You can provide values when you execute your request with `-a` or `--arg`:
 
 ```
-$ dbgr r many_arguments -a a1=foo
-a2:
-a3 [default]:
+$ dbgr r many_arguments -a arg1=foo
+arg2:
+arg3 [default]:
 ```
 
 ```
-$ dbgr r many_arguments -a a1=foo -a a3=bar
-a2:
+$ dbgr r many_arguments -a arg1=foo -a arg3=bar
+arg2:
 ```
 
-When you call DBGR with `-d` or `--use-defaults` swith, you will be prompted only for arguments without default valus:
+When you call DBGR with `-d` or `--use-defaults` swith, you will be prompted only for arguments without default values:
 
 ```
 $ dbgr r many_arguments -d
-a1:
-a2:
+arg1:
+arg2:
 ```
 
 And finally, you can combine everything together:
 
 ```
-$ dbgr r many_arguments -d -a a1=foo
-a2:
+$ dbgr r many_arguments -d -a arg1=foo
+arg2:
 ```
 
 ### Order of precedence of arguments
 This is an order in which argument values are resolved:
-1. If you provide argument using `-a` switch, it will always be used.You will not be prompted. Default value is ignored.
-2. If you use `-d` switch, dbgr will use default values when possible. You will not be prompted for arguments with default values.
-3. You will get prompted for arguments with default values. Hitting enter without any input will use default value.
-4. You will get prompted for arguments without default values. Hitting enter without any input will result in empty string being used.
+1. If you provide argument using `-a`/`--arg` switch, it will always be used. You will not be prompted. Default value is ignored.
+2. If you use `-d`/`--use-defaults` switch, dbgr will use default values when possible. You will not be prompted for arguments with default values.
+3. You will get prompted for arguments without default values. Hitting enter without any input will result in empty string being used.
+4. You will get prompted for arguments with default values. Hitting enter without any input will use default value.
 
 
 ## Return value
-Your request can return a value. This return value will be printed to the terminal when you execute a request. It also gets returned when you implement recursive calls. This can be usefull for example for authentication.
+Your request can return a value. This return value will be printed to the terminal when you execute a request. It also gets returned when you implement [recursive calls](#recursive-calls). This can be usefull for example for authentication.
 
-The return value also get cached when cache is used.
+The return value also get cached when [cache is used](#caching).
 
 
 ## Environment
-Environments offere you different way to specify variables for your requests. Your default environment is placed in `default.ini`. This is a file in ini format using [ExtendedInterpolation](https://docs.python.org/3/library/configparser.html#configparser.ExtendedInterpolation).
+Environments offer you different way to specify variables for your requests. Your default environment is placed in `default.ini`. This is a file in ini format using [ExtendedInterpolation](https://docs.python.org/3/library/configparser.html#configparser.ExtendedInterpolation).
+
+You can change the environment that will be used with `-e`/`--env` switch. DBGR searched for environments in current working directory in .ini files. Name of the environment is the name of the file without suffix.
+
 
 ## Recursive calls
 Sometimes you might need to make a different requests before executing what you really want to do. For example to download user data, you need to login first. You can do that by using coroutine `dbgr.response`. It accepts at least 3 arguments - name of the request to execute as a string (you can specify module the same as in terminal), environment and session.
@@ -121,7 +124,7 @@ async def get_data(env, session):
     data = session.get('...data', headers={'Authorization': f'Bearer {auth["token"}'})
 ```
 
-> DBGR doens't try to detect reccursion. Be carefull to unintentionaly cause DDoS on your servers.
+> DBGR doens't try to detect reccursion. Be carefull not to unintentionaly cause DDoS on your (or some elses) servers.
 
 
 ### Arguments
@@ -156,7 +159,7 @@ async def export_comments(env, session):
 
 
 ## Caching
-You can mark request to be cached in memory. All subsequent calls of the same request will be suspended and the result will be taken from cache. This is usefull for example when you work with API that requires sign-in. You usually want to call the authentication endpoint only once at the beginning and then just re-use cached value.
+You can mark request to be cached. All subsequent calls of the same request will be suspended and the result will be taken from cache. This is usefull for example when you work with API that requires sign-in. You usually want to call the authentication endpoint only once at the beginning and then just re-use cached value.
 
 To enable caching call `@request` decorator with `cache` argument:
 
