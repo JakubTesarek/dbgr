@@ -80,7 +80,7 @@ async def main():
     int_parser.add_argument(
         '-d', '--use-defaults', action='store_true',
         help='Use default values when possible')
-    int_parser.set_defaults(func=interactive_command)
+    int_parser.set_defaults(func=interactive_command, arguments=[])
 
     req_parser = subparsers.add_parser(
         'request',
@@ -98,7 +98,7 @@ async def main():
         '-d', '--use-defaults', action='store_true',
         help='Use default values when possible')
     req_parser.add_argument(
-        '-a', '--arg', dest='arguments', action='append',
+        '-a', '--arg', dest='arguments', action='append', default=[],
         help='Arguments for requests execution')
 
     req_parser.set_defaults(func=request_command)

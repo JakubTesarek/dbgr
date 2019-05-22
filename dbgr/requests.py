@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from pprint import pprint
 
 _REQUESTS = None
+_CACHE = {}
 
 class RequestNotFoundError(ValueError): pass
 class RequestNotImplementsError(RequestNotFoundError): pass
@@ -51,7 +52,7 @@ class NoDefaultValueArgument(Argument):
             return kwargs[self.name]
         value = input(f'{self}: ')
         return value
-    
+
 
 class DefaultValueArgument(Argument):
     def __init__(self, name, value):
@@ -77,6 +78,7 @@ class Request:
         self.name = name if name is not None else request.__name__
         self.request = request
         self.validate_name()
+        self.cache = cache
 
     @property
     def module(self):
@@ -99,13 +101,24 @@ class Request:
                 extras.append(NoDefaultValueArgument(argument))
         return extras[::-1]
 
-    async def __call__(self, env, session, use_defaults=False, kwargs={}):
-        resolved_kwargs = {} 
+    def resolve_arguments(self, use_defaults, kwargs):
+        arguments = {}
         for argument in self.extra_arguments:
-            resolved_kwargs[argument.name] = argument.get_value(
+            arguments[argument.name] = argument.get_value(
                 kwargs, use_default=use_defaults
             )
-        value = await self.request(env, session, **resolved_kwargs)
+        return arguments
+
+    async def __call__(self, env, session, use_defaults=False, kwargs={}):
+        arguments = self.resolve_arguments(use_defaults, kwargs)
+        if self.cache:
+            cached = True
+            key = (self.name, self.module, frozenset(arguments))
+            if key not in _CACHE:
+                cached = False
+                _CACHE[key] = await self.request(env, session, **arguments)
+            return Result(_CACHE[key], cached)
+        value = await self.request(env, session, **arguments)
         return Result(value)
 
     def validate_name(self):
@@ -135,7 +148,7 @@ def parse_cmd_arguments(args):
         else:
             result[parsed[0]] = parsed[1]
     return result
-    
+
 
 async def execute_request(session, environment, request, use_defaults=False, **kwargs):
     request = find_request(request)
