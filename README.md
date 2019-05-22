@@ -1,5 +1,5 @@
 # DBGR
-Dbgr [read 'debugger'] is a terminal tool to test and debug HTTP APIs.
+Dbgr [read 'ˌdiːˈbʌɡər'] is a terminal tool to test and debug HTTP APIs.
 
 ## Project setup
 To setup a project create new directory and inside create .py file with this content:
@@ -180,7 +180,20 @@ async def login(env, session):
 @request
 async def list_comments(env, session):
     auth = response('login', env, session, cache=False) # This will result in HTTP call
+    ...
 ```
+
+
+## Asserts
+DBGR supports assertions in requests. If a assert fails, it will get reported to the terminal.
+
+```
+@request
+async def create_item(env, session):
+    rv = session.post('/comments', data={...})
+    assert rv.status == 201
+```
+
 
 ## Autocomplete and History
 DBGR supports autocomplete for commands and requests. You need to install and setup [argcomplete](https://pypi.org/project/argcomplete/) according to documentation.
