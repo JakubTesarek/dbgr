@@ -53,6 +53,8 @@ async def list_command(args):
             print(f'{colorama.Style.BRIGHT}{module}:')
             for name, request in requests.items():
                 print(f' - {name}')
+                if request.cache:
+                    print(f'   {colorama.Style.DIM}cached')
                 if request.doc:
                     print(f'   {colorama.Style.DIM}{request.doc}')
                 if request.extra_arguments:

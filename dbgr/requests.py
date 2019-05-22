@@ -157,7 +157,7 @@ async def execute_request(
 ):
     request = find_request(request)
     result = await request(
-        environment, session, use_defaults=use_defaults, cache, kwargs=kwargs)
+        environment, session, use_defaults=use_defaults, cache=cache, kwargs=kwargs)
     result.print()
     return result.value
 
