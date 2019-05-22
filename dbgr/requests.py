@@ -46,7 +46,7 @@ class Argument:
 
 
 class NoDefaultValueArgument(Argument):
-    def get_value(self, kwargs):
+    def get_value(self, kwargs, use_default=None):
         if self.name in kwargs:
             return kwargs[self.name]
         value = input(f'{self}: ')
@@ -61,9 +61,11 @@ class DefaultValueArgument(Argument):
     def __str__(self):
         return f'{self.name} [{self.value}]'
 
-    def get_value(self, kwargs):
+    def get_value(self, kwargs, use_default=False):
         if self.name in kwargs:
             return kwargs[self.name]
+        if use_default == True:
+            return self.value
         value = input(f'{self}: ')
         if value == '':
             value = self.value
@@ -97,11 +99,13 @@ class Request:
                 extras.append(NoDefaultValueArgument(argument))
         return extras[::-1]
 
-    async def __call__(self, *args, **kwargs):
+    async def __call__(self, env, session, use_defaults=False, kwargs={}):
         resolved_kwargs = {} 
         for argument in self.extra_arguments:
-            resolved_kwargs[argument.name] = argument.get_value(kwargs)
-        value = await self.request(*args, **resolved_kwargs)
+            resolved_kwargs[argument.name] = argument.get_value(
+                kwargs, use_default=use_defaults
+            )
+        value = await self.request(env, session, **resolved_kwargs)
         return Result(value)
 
     def validate_name(self):
@@ -122,9 +126,20 @@ def get_requests():
     return _REQUESTS
 
 
-async def execute_request(session, environment, request):
+def parse_cmd_arguments(args):
+    result = {}
+    for arg in args:
+        parsed = arg.split('=', 1)
+        if len(parsed) == 1:
+            result[arg] = True
+        else:
+            result[parsed[0]] = parsed[1]
+    return result
+    
+
+async def execute_request(session, environment, request, use_defaults=False, **kwargs):
     request = find_request(request)
-    result = await request(environment, session)
+    result = await request(environment, session, use_defaults=use_defaults, kwargs=kwargs)
     result.print()
     return result.value
 

@@ -11,7 +11,7 @@ import argcomplete
 import colorama
 import sys
 import traceback
-from dbgr.requests import get_requests, execute_request, RequestNotFoundError
+from dbgr.requests import get_requests, execute_request, RequestNotFoundError, parse_cmd_arguments
 from dbgr.environment import Environment
 from dbgr.session import get_session
 from dbgr.completion import RequestsCompleter, ModulesCompleter
@@ -21,7 +21,9 @@ async def prepare_and_execute_request(request, args):
     try:
         session = get_session()
         environment = Environment(args.env)
-        await execute_request(session, environment, request)
+        arguments = parse_cmd_arguments(args.arguments)
+        await execute_request(
+            session, environment, request, use_defaults=args.use_defaults, **arguments)
     except AssertionError as e:
         _, _, tb = sys.exc_info()
         tb_info = traceback.extract_tb(tb)
@@ -76,7 +78,7 @@ async def main():
         '-e', '--env', default='default',
         help='Environment that will be used (default: "default"')
     int_parser.add_argument(
-        '-d', '--use-defaults', nargs='?',
+        '-d', '--use-defaults', action='store_true',
         help='Use default values when possible')
     int_parser.set_defaults(func=interactive_command)
 
@@ -93,8 +95,12 @@ async def main():
         '-e', '--env', default='default',
         help='Environment that will be used')
     req_parser.add_argument(
-        '-d', '--use-defaults', nargs='?',
+        '-d', '--use-defaults', action='store_true',
         help='Use default values when possible')
+    req_parser.add_argument(
+        '-a', '--arg', dest='arguments', action='append',
+        help='Arguments for requests execution')
+
     req_parser.set_defaults(func=request_command)
 
     list_parser = subparsers.add_parser(
