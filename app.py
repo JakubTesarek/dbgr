@@ -55,11 +55,8 @@ async def list_command(args):
                     print(f'   {colorama.Style.DIM}{request.doc}')
                 if request.extra_arguments:
                     print(f'   {colorama.Style.DIM}Arguments:')
-                    for name, default in request.extra_arguments.items():
-                        if default is not None:
-                            print(f'    {colorama.Style.DIM}- {name} [default: {default}]')
-                        else:
-                            print(f'    {colorama.Style.DIM}- {name}')
+                    for argument in request.extra_arguments:
+                        print(f'    {colorama.Style.DIM}- {argument}')
 
 
 async def main():
@@ -76,9 +73,11 @@ async def main():
         help=interactive_command.__doc__
     )
     int_parser.add_argument(
-        '-e', '--env',
-        default='default',
+        '-e', '--env', default='default',
         help='Environment that will be used (default: "default"')
+    int_parser.add_argument(
+        '-d', '--use-defaults', nargs='?',
+        help='Use default values when possible')
     int_parser.set_defaults(func=interactive_command)
 
     req_parser = subparsers.add_parser(
@@ -91,9 +90,11 @@ async def main():
         help='Name of the request to execute'
     ).completer=RequestsCompleter()
     req_parser.add_argument(
-        '-e', '--env',
-        default='default',
+        '-e', '--env', default='default',
         help='Environment that will be used')
+    req_parser.add_argument(
+        '-d', '--use-defaults', nargs='?',
+        help='Use default values when possible')
     req_parser.set_defaults(func=request_command)
 
     list_parser = subparsers.add_parser(

@@ -37,6 +37,39 @@ class Result:
             pprint(self.value)
 
 
+class Argument:
+    def __init__(self, name):
+       self.name = name
+
+    def __str__(self):
+        return self.name
+
+
+class NoDefaultValueArgument(Argument):
+    def get_value(self, kwargs):
+        if self.name in kwargs:
+            return kwargs[self.name]
+        value = input(f'{self}: ')
+        return value
+    
+
+class DefaultValueArgument(Argument):
+    def __init__(self, name, value):
+        super().__init__(name)
+        self.value = value
+
+    def __str__(self):
+        return f'{self.name} [{self.value}]'
+
+    def get_value(self, kwargs):
+        if self.name in kwargs:
+            return kwargs[self.name]
+        value = input(f'{self}: ')
+        if value == '':
+            value = self.value
+        return value
+
+
 class Request:
     def __init__(self, request, name=None, cache=None):
         self.name = name if name is not None else request.__name__
@@ -54,14 +87,21 @@ class Request:
 
     @property
     def extra_arguments(self):
+        extras = []
         args_spec = inspect.getargspec(self.request)
-        arguments = args_spec.args[2:] # Remove env and session
         defaults = list(args_spec.defaults or [])
-        defaults = [None] * (len(arguments) - len(defaults)) + defaults
-        return dict(zip(arguments, defaults))
+        for argument in args_spec.args[:1:-1]:
+            if defaults:
+                extras.append(DefaultValueArgument(argument, defaults.pop()))
+            else:
+                extras.append(NoDefaultValueArgument(argument))
+        return extras[::-1]
 
-    async def __call__(self, *args, **kwargs ):
-        value = await self.request(*args, **kwargs)
+    async def __call__(self, *args, **kwargs):
+        resolved_kwargs = {} 
+        for argument in self.extra_arguments:
+            resolved_kwargs[argument.name] = argument.get_value(kwargs)
+        value = await self.request(*args, **resolved_kwargs)
         return Result(value)
 
     def validate_name(self):
