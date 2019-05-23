@@ -4,7 +4,7 @@ import os
 import importlib.util
 import glob
 from dataclasses import dataclass
-from pprint import pprint
+from pprint import pformat
 
 _REQUESTS = None
 _CACHE = {}
@@ -15,53 +15,77 @@ class AmbiguousRequestNameError(RequestNotFoundError): pass
 class InvalidRequestNameError(ValueError): pass
 class DuplicateRequestNameError(ValueError): pass
 
+class Type:
+    supported_types = ['bool', 'str', 'int', 'float', 'bytes']
+
+    def __init__(self, cls):
+        self.cls = None
+        if cls and cls.__name__ in self.supported_types:
+            self.cls = cls
+
+    def cast(self, value):
+        if value is not None and self:
+            return self.cls(value)
+        return value
+
+    def __str__(self):
+        if self:
+            return self.cls.__name__
+        return ''
+
+    def __bool__(self):
+        return self.cls is not None
+
 
 @dataclass
 class Result:
-    value: object
+    _value: object
+    annotation: Type
     cached: bool = False
 
     def __str__(self):
+        from_cache = ''
+        if self.cached:
+            from_cache = ', from cache'
+        buffer = (
+            f'{colorama.Style.BRIGHT}Result{colorama.Style.RESET_ALL} '
+            f'{colorama.Style.DIM}({type(self.value).__name__}{from_cache})'
+        )
         if self.value is not None:
-            if self.cached:
-                return (
-                    f'{colorama.Style.BRIGHT}Result{colorama.Style.RESET_ALL} '
-                    f'{colorama.Style.DIM}({type(self.value).__name__}, from cache)'
-                    f'{colorama.Style.RESET_ALL}:'
-                )
-            else:
-                return (
-                    f'{colorama.Style.BRIGHT}Result{colorama.Style.RESET_ALL} '
-                    f'{colorama.Style.DIM}({type(self.value).__name__})'
-                    f'{colorama.Style.RESET_ALL}:'
-                )
+            buffer += f'{colorama.Style.RESET_ALL}:\n{pformat(self.value)}'
+        return buffer
+
+    @property
+    def value(self):
+        return self.annotation.cast(self._value)
 
 
 class Argument:
-    supported_types = set(['str', 'int', 'bytes'])
     def __init__(self, name, annotation):
         self.name = name
         self.annotation = annotation
 
-    def type_supported(self):
-        return self.annotation and self.annotation.__name__ in self.supported_types
-
     def __str__(self):
-        if self.type_supported():
-            return f'{self.name} [type: {self.annotation.__name__}]'
+        if self.annotation:
+            return f'{self.name} [type: {self.annotation}]'
         return self.name
 
-    def cast_type(self, value):
-        if self.type_supported():
-            return self.annotation(value)
+    def value_input(self, nullable=False):
+        value = input(f'{self}: ')
+        if nullable and value == '':
+            return None
+        try:
+            return self.annotation.cast(value)
+        except:
+            print(f'{colorama.Fore.RED}String "{value}" cannot be converted to {self.annotation}')
+            return self.value_input(nullable)
 
 
 class NoDefaultValueArgument(Argument):
     def get_value(self, kwargs, use_default=None):
         if self.name in kwargs:
-            return kwargs[self.name]
-        value = input(f'{self}: ')
-        return self.cast_type(value)
+            return self.annotation.cast(kwargs[self.name])
+        return self.value_input()
 
 
 class DefaultValueArgument(Argument):
@@ -70,36 +94,29 @@ class DefaultValueArgument(Argument):
         self.value = value
 
     def __str__(self):
-        if self.type_supported():
-            return f'{self.name} [default: {self.value}, type: {self.annotation.__name__}]'
-        return f'{self.name} [{self.value}]'
+        if self.annotation:
+            return f'{self.name} [default: {self.value}, type: {self.annotation}]'
+        return f'{self.name} [default: {self.value}]'
 
     def get_value(self, kwargs, use_default=False):
         if self.name in kwargs:
-            return kwargs[self.name]
-        if use_default == True:
-            return self.value
-        value = input(f'{self}: ')
-        if value == '':
+            value = self.annotation.cast(kwargs[self.name])
+        elif use_default == True:
             value = self.value
-        return self.cast_type(value)
+        else:
+            value = self.value_input(nullable=True)
+            if value == '':
+                value = self.value
+        return value
 
 
 class Request:
-    supported_types = set(['str', 'int', 'bytes'])
-
     def __init__(self, request, name=None, cache=None):
         self.name = name if name is not None else request.__name__
         self.request = request
         self.cache = cache
         self.validate_name()
-        self.annotate_return_value()
-
-    def annotate_return_value(self):
-        self.annotation = None
-        annotation = self.request.__annotations__.get('return')
-        if annotation and annotation.__name__ in self.supported_types:
-            self.annotation = annotation
+        self.annotation = Type(self.request.__annotations__.get('return'))
 
     @property
     def module(self):
@@ -116,7 +133,7 @@ class Request:
         args_spec = inspect.getfullargspec(self.request)
         defaults = list(args_spec.defaults or [])
         for argument in args_spec.args[:1:-1]:
-            annotation = args_spec.annotations.get(argument)
+            annotation = Type(args_spec.annotations.get(argument))
             if defaults:
                 arg = DefaultValueArgument(argument, annotation, defaults.pop())
             else:
@@ -142,9 +159,9 @@ class Request:
             if key not in _CACHE or cache == False:
                 cached = False
                 _CACHE[key] = await self.request(env, session, **arguments)
-            return Result(_CACHE[key], cached)
+            return Result(_CACHE[key], self.annotation, cached)
         value = await self.request(env, session, **arguments)
-        return Result(value)
+        return Result(value, self.annotation)
 
     def validate_name(self):
         if not self.name.isidentifier():
@@ -164,7 +181,7 @@ class Request:
             if self.cache:
                 b1 = f'cache: {self.cache}'
             if self.annotation:
-                b2 = f'return: {self.annotation.__name__}'
+                b2 = f'return: {self.annotation}'
             buffer += f'  {colorama.Style.DIM}[{b1}{", " if b1 and b2 else ""}{b2}]\n'
         if self.doc:
             buffer += f'  {colorama.Style.DIM}{self.doc}\n'
@@ -198,7 +215,7 @@ async def execute_request(
     request = find_request(request)
     result = await request(
         environment, session, use_defaults=use_defaults, cache=cache, kwargs=kwargs)
-    pprint(result)
+    print(result)
     return result.value
 
 
