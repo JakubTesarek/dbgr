@@ -44,7 +44,7 @@ When defining your request, you can specify any number of arguments that it will
 
 ```
 @request
-async def many_arguments(env, session, arg1, arg2, arg3='default'):
+async def many_arguments(env, session, arg1, arg2, arg3='foo'):
     pass
 ```
 
@@ -54,7 +54,7 @@ When you call this request from terminal, you will be prompted for all 3 argumen
 $ dbgr r many_arguments
 arg1:
 arg2:
-arg3 [default]:
+arg3 [default: foo]:
 ```
 
 You can provide values when you execute your request with `-a` or `--arg`:
@@ -62,7 +62,7 @@ You can provide values when you execute your request with `-a` or `--arg`:
 ```
 $ dbgr r many_arguments -a arg1=foo
 arg2:
-arg3 [default]:
+arg3 [default: foo]:
 ```
 
 ```
@@ -92,11 +92,55 @@ This is an order in which argument values are resolved:
 3. You will get prompted for arguments without default values. Hitting enter without any input will result in empty string being used.
 4. You will get prompted for arguments with default values. Hitting enter without any input will use default value.
 
+### Types annotations
+It is possible to annotate expected types of arguments in the request definition. DBGR will try to convert the input value into desired type.
+
+You can annotate as many arguments as you want. Arguments without annotation will be passed as strings.
+
+```
+@request
+async def get_comment(env, session, comment_id: int):
+    data = session.get('/comments', params={'id': comment_id})
+```
+
+```
+$dbgr r get_comment
+comment_id [type: int]: # Input will be converted to integer
+```
+
+You can also combine default values with annotation.
+
+```
+@request
+async def get_comment(env, session, comment_id: int=1):
+    data = session.get('/comments', params={'id': comment_id})
+```
+
+```
+$dbgr r get_comment
+comment_id [default: 1, type: int]:
+```
+
+If you use default value by pressing enter without any input, DBGR will not check type and will just pass the value as it is.
+
+DBGR currently supports these type: `int`, `float`, `bool`, `str`. Every other annotation type will be ignored.
+
+Booleans are handled in a special way. Values `0`, `f`, `false`, `n`, `no` (and their variants in different case) will be converted to `False`, everything else will be converted to `True`.
+
 
 ## Return value
 Your request can return a value. This return value will be printed to the terminal when you execute a request. It also gets returned when you implement [recursive calls](#recursive-calls). This can be usefull for example for authentication.
 
 The return value also get cached when [cache is used](#caching).
+
+You can use type hinting with the same [limitations as with arguments](#types_annotations). DBGR will try to convert the return value into the specified type.
+
+```
+@request
+async def count_comments(env, session) -> int:
+    resp = session.get('/comments')
+    return len(resp.json())
+```
 
 
 ## Environment
@@ -115,13 +159,13 @@ from dbgr import request, response
 
 @request
 async def login(env, session):
-    rv = session.post('...login')
+    rv = session.post('/login', data={'username': env['login']})
     return await rv.json()
 
 @request
-async def get_data(env, session):
+async def get_comments(env, session):
     auth = response('login', env, session)
-    data = session.get('...data', headers={'Authorization': f'Bearer {auth["token"}'})
+    data = session.get('/comments', headers={'Authorization': f'Bearer {auth["token"}'})
 ```
 
 > DBGR doens't try to detect reccursion. Be carefull not to unintentionaly cause DDoS on your (or some elses) servers.
@@ -133,13 +177,13 @@ As with the terminal execution, you can provide arguments for recursive calls. S
 ```
 @request
 async def login(env, session, username):
-    rv = session.post('...login', data={'username': username})
+    rv = session.post('/login', data={'username': username})
     return await rv.json()
 
 @request
 async def get_comments(env, session):
     auth = response('login', env, session, username='admin@example.com')
-    data = session.get('...data', headers={'Authorization': f'Bearer {auth["token"}'})
+    data = session.get('/comments', headers={'Authorization': f'Bearer {auth["token"}'})
 ```
 
 You can also specify you want to use default values wherever possible with `use_defaults`:
