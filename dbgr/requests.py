@@ -21,29 +21,39 @@ class Result:
     value: object
     cached: bool = False
 
-    def print(self):
+    def __str__(self):
         if self.value is not None:
             if self.cached:
-                print(
+                return (
                     f'{colorama.Style.BRIGHT}Result{colorama.Style.RESET_ALL} '
                     f'{colorama.Style.DIM}({type(self.value).__name__}, from cache)'
                     f'{colorama.Style.RESET_ALL}:'
                 )
             else:
-                print(
+                return (
                     f'{colorama.Style.BRIGHT}Result{colorama.Style.RESET_ALL} '
                     f'{colorama.Style.DIM}({type(self.value).__name__})'
                     f'{colorama.Style.RESET_ALL}:'
                 )
-            pprint(self.value)
 
 
 class Argument:
-    def __init__(self, name):
-       self.name = name
+    supported_types = ['str', 'int', 'bytes']
+    def __init__(self, name, annotation):
+        self.name = name
+        self.annotation = annotation
+
+    def type_supported(self):
+        return self.annotation and self.annotation.__name__ in self.supported_types
 
     def __str__(self):
+        if self.type_supported():
+            return f'{self.name} [type: {self.annotation.__name__}]'
         return self.name
+
+    def cast_type(self, value):
+        if self.type_supported():
+            return self.annotation(value)
 
 
 class NoDefaultValueArgument(Argument):
@@ -51,15 +61,17 @@ class NoDefaultValueArgument(Argument):
         if self.name in kwargs:
             return kwargs[self.name]
         value = input(f'{self}: ')
-        return value
+        return self.cast_type(value)
 
 
 class DefaultValueArgument(Argument):
-    def __init__(self, name, value):
-        super().__init__(name)
+    def __init__(self, name, annotation, value):
+        super().__init__(name, annotation)
         self.value = value
 
     def __str__(self):
+        if self.type_supported():
+            return f'{self.name} [default: {self.value}, type: {self.annotation.__name__}]'
         return f'{self.name} [{self.value}]'
 
     def get_value(self, kwargs, use_default=False):
@@ -70,7 +82,7 @@ class DefaultValueArgument(Argument):
         value = input(f'{self}: ')
         if value == '':
             value = self.value
-        return value
+        return self.cast_type(value)
 
 
 class Request:
@@ -92,13 +104,15 @@ class Request:
     @property
     def extra_arguments(self):
         extras = []
-        args_spec = inspect.getargspec(self.request)
+        args_spec = inspect.getfullargspec(self.request)
         defaults = list(args_spec.defaults or [])
         for argument in args_spec.args[:1:-1]:
+            annotation = args_spec.annotations.get(argument)
             if defaults:
-                extras.append(DefaultValueArgument(argument, defaults.pop()))
+                arg = DefaultValueArgument(argument, annotation, defaults.pop())
             else:
-                extras.append(NoDefaultValueArgument(argument))
+                arg = NoDefaultValueArgument(argument, annotation)
+            extras.append(arg)
         return extras[::-1]
 
     def resolve_arguments(self, use_defaults, kwargs):
@@ -134,6 +148,18 @@ class Request:
                 f'"{self.name}" is already defined in module {self.module}'
             )
 
+    def __str__(self):
+        buffer = f'- {self.name}\n'
+        if self.cache:
+            buffer += f'  {colorama.Style.DIM}cached\n'
+        if self.doc:
+            buffer += f'  {colorama.Style.DIM}{self.doc}\n'
+        if self.extra_arguments:
+            buffer += f'  {colorama.Style.DIM}Arguments:\n'
+            for argument in self.extra_arguments:
+                buffer += f'   {colorama.Style.DIM}- {argument}\n'
+        return buffer
+
 
 def get_requests():
     if _REQUESTS is None:
@@ -158,7 +184,7 @@ async def execute_request(
     request = find_request(request)
     result = await request(
         environment, session, use_defaults=use_defaults, cache=cache, kwargs=kwargs)
-    result.print()
+    pprint(result)
     return result.value
 
 

@@ -11,6 +11,7 @@ import argcomplete
 import colorama
 import sys
 import traceback
+import textwrap
 from dbgr.requests import get_requests, execute_request, RequestNotFoundError, parse_cmd_arguments
 from dbgr.environment import Environment
 from dbgr.session import get_session
@@ -51,16 +52,8 @@ async def list_command(args):
     for module, requests in get_requests().items():
         if not args.module or module == args.module:
             print(f'{colorama.Style.BRIGHT}{module}:')
-            for name, request in requests.items():
-                print(f' - {name}')
-                if request.cache:
-                    print(f'   {colorama.Style.DIM}cached')
-                if request.doc:
-                    print(f'   {colorama.Style.DIM}{request.doc}')
-                if request.extra_arguments:
-                    print(f'   {colorama.Style.DIM}Arguments:')
-                    for argument in request.extra_arguments:
-                        print(f'    {colorama.Style.DIM}- {argument}')
+            for request in requests.values():
+                print(textwrap.indent(str(request), ' '), end='')
 
 
 async def main():
