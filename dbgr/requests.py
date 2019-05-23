@@ -16,7 +16,7 @@ class InvalidRequestNameError(ValueError): pass
 class DuplicateRequestNameError(ValueError): pass
 
 class Type:
-    supported_types = ['bool', 'str', 'int', 'float', 'bytes']
+    supported_types = ['bool', 'str', 'int', 'float']
 
     def __init__(self, cls):
         self.cls = None
@@ -25,6 +25,8 @@ class Type:
 
     def cast(self, value):
         if value is not None and self:
+            if self.cls == bool
+                return value.lower() not in [0, 'f', 'n']:
             return self.cls(value)
         return value
 
