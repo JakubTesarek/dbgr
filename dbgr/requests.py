@@ -38,7 +38,7 @@ class Result:
 
 
 class Argument:
-    supported_types = ['str', 'int', 'bytes']
+    supported_types = set(['str', 'int', 'bytes'])
     def __init__(self, name, annotation):
         self.name = name
         self.annotation = annotation
@@ -86,11 +86,20 @@ class DefaultValueArgument(Argument):
 
 
 class Request:
+    supported_types = set(['str', 'int', 'bytes'])
+
     def __init__(self, request, name=None, cache=None):
         self.name = name if name is not None else request.__name__
         self.request = request
-        self.validate_name()
         self.cache = cache
+        self.validate_name()
+        self.annotate_return_value()
+
+    def annotate_return_value(self):
+        self.annotation = None
+        annotation = self.request.__annotations__.get('return')
+        if annotation and annotation.__name__ in self.supported_types:
+            self.annotation = annotation
 
     @property
     def module(self):
@@ -150,8 +159,13 @@ class Request:
 
     def __str__(self):
         buffer = f'- {self.name}\n'
-        if self.cache:
-            buffer += f'  {colorama.Style.DIM}cached\n'
+        if self.annotation or self.cache:
+            b1, b2 = '', ''
+            if self.cache:
+                b1 = f'cache: {self.cache}'
+            if self.annotation:
+                b2 = f'return: {self.annotation.__name__}'
+            buffer += f'  {colorama.Style.DIM}[{b1}{", " if b1 and b2 else ""}{b2}]\n'
         if self.doc:
             buffer += f'  {colorama.Style.DIM}{self.doc}\n'
         if self.extra_arguments:
