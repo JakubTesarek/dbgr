@@ -1,4 +1,5 @@
 from dbgr.requests import get_requests
+from dbgr.environment import get_environments
 
 
 class Completer:
@@ -12,6 +13,11 @@ class Completer:
 
     def get_choices(self):
         raise NotImplementedError(f'"{__name__}" needs to be implemented in subclass')
+
+
+class EnvironmentsCompleter:
+    def get_choices(self):
+        return tupe(get_environments())
 
 
 class RequestsCompleter(Completer):

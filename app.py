@@ -13,9 +13,9 @@ import sys
 import traceback
 import textwrap
 from dbgr.requests import get_requests, execute_request, RequestNotFoundError, parse_cmd_arguments
-from dbgr.environment import Environment
+from dbgr.environment import Environment, get_environments
 from dbgr.session import get_session
-from dbgr.completion import RequestsCompleter, ModulesCompleter
+from dbgr.completion import RequestsCompleter, ModulesCompleter, EnvironmentsCompleter
 
 
 async def prepare_and_execute_request(request, args):
@@ -38,6 +38,7 @@ async def prepare_and_execute_request(request, args):
 
 
 async def interactive_command(args):
+    ''' Run requests in interactive mode '''
     print(f'{colorama.Style.DIM}Dbgr interactive mode; press ^C to exit.')
     while True:
         request = input('> ')
@@ -45,15 +46,23 @@ async def interactive_command(args):
 
 
 async def request_command(args):
+    ''' Execute request '''
     await prepare_and_execute_request(args.request, args)
 
 
 async def list_command(args):
+    ''' List all available requests and their arguments '''
     for module, requests in get_requests().items():
         if not args.module or module == args.module:
             print(f'{colorama.Style.BRIGHT}{module}:')
             for request in requests.values():
                 print(textwrap.indent(str(request), ' '), end='')
+
+
+async def environments_command(args):
+    ''' List all available environments '''
+    for env in get_environments():
+        print(f'- {env}')
 
 
 async def main():
@@ -71,7 +80,8 @@ async def main():
     )
     int_parser.add_argument(
         '-e', '--env', default='default',
-        help='Environment that will be used (default: "default"')
+        help='Environment that will be used (default: "default")'
+    ).completer=EnvironmentsCompleter()
     int_parser.add_argument(
         '-d', '--use-defaults', action='store_true',
         help='Use default values when possible')
@@ -88,14 +98,14 @@ async def main():
     ).completer=RequestsCompleter()
     req_parser.add_argument(
         '-e', '--env', default='default',
-        help='Environment that will be used')
+        help='Environment that will be used'
+    ).completer=EnvironmentsCompleter()
     req_parser.add_argument(
         '-d', '--use-defaults', action='store_true',
         help='Use default values when possible')
     req_parser.add_argument(
         '-a', '--arg', dest='arguments', action='append', default=[],
         help='Arguments for requests execution')
-
     req_parser.set_defaults(func=request_command)
 
     list_parser = subparsers.add_parser(
@@ -108,6 +118,12 @@ async def main():
         help='Filter requests by module'
     ).completer=ModulesCompleter()
     list_parser.set_defaults(func=list_command)
+
+    environments_parser = subparsers.add_parser(
+        'list-environments',
+        aliases=['envs', 'e'],
+        help=environments_command.__doc__)
+    environments_parser.set_defaults(func=environments_command)
 
     argcomplete.autocomplete(parser)
     args = parser.parse_args()
