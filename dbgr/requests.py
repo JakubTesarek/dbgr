@@ -107,7 +107,7 @@ class DefaultValueArgument(Argument):
             value = self.value
         else:
             value = self.value_input(nullable=True)
-            if value == '':
+            if value is None:
                 value = self.value
         return value
 
