@@ -1,7 +1,11 @@
 from setuptools import setup, find_packages
 from os import path
 
-here = path.abspath(path.dirname(__file__))
+with open('requirements.txt') as fp:
+    install_requires = fp.read()
+
+with open('requirements-dev.txt') as fp:
+    extras_require = fp.read()
 
 with open('README.md') as readme:
     long_description = readme.read()
@@ -25,7 +29,7 @@ setup(
     packages=find_packages(),
     py_modules = ['app'],
     include_package_data=True,
-    install_requires=['aiohttp', 'colorama', 'argcomplete', 'pygments'],
-    extras_require={'test': ['pytest', 'pylint', 'pytest-cov']},
+    install_requires=install_requires,
+    extras_require={'test': extras_require},
     entry_points={'console_scripts': ['dbgr = app:dbgr']}
 )

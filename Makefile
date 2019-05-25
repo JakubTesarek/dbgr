@@ -5,7 +5,7 @@ clean:
 	rm -rf *.pyc __pycache__
 	rm -rf kwargs.egg-info build dist
 
-build:
+build: clean
 	python setup.py sdist bdist_wheel
 
 publish_test:
