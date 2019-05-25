@@ -52,3 +52,8 @@ def test_cast_boolean_false(value):
     t = Type(bool)
     assert t.cast(value) == False
 
+
+def test_cannot_cast_strings_to_int():
+    t = Type(int)
+    with pytest.raises(ValueError):
+        assert t.cast('string')
