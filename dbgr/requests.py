@@ -74,21 +74,27 @@ class Argument:
             return f'{self.name} [type: {self.annotation}]'
         return self.name
 
+    def cast(self, value):
+        try:
+            return self.annotation.cast(value)
+        except:
+            print(f'{colorama.Fore.RED}String "{value}" cannot be converted to {self.annotation}')
+            raise
+        
     def value_input(self, nullable=False):
         value = input(f'{self}: ')
         if nullable and value == '':
             return None
         try:
-            return self.annotation.cast(value)
+            return self.cast(value)
         except:
-            print(f'{colorama.Fore.RED}String "{value}" cannot be converted to {self.annotation}')
             return self.value_input(nullable)
 
 
 class NoDefaultValueArgument(Argument):
     def get_value(self, kwargs, use_default=None):
         if self.name in kwargs:
-            return self.annotation.cast(kwargs[self.name])
+            return self.cast(kwargs[self.name])
         return self.value_input()
 
 
@@ -104,7 +110,7 @@ class DefaultValueArgument(Argument):
 
     def get_value(self, kwargs, use_default=False):
         if self.name in kwargs:
-            value = self.annotation.cast(kwargs[self.name])
+            value = self.cast(kwargs[self.name])
         elif use_default == True:
             value = self.value
         else:
