@@ -1,4 +1,5 @@
+twine
 pytest
 pylint
 pytest-cov
-twine
+codecov
