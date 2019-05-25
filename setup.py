@@ -25,7 +25,7 @@ setup(
     packages=find_packages(),
     py_modules = ['app'],
     include_package_data=True,
-    install_requires=['aiohttp', 'jinja2', 'colorama', 'argcomplete', 'pygments'],
+    install_requires=['aiohttp', 'colorama', 'argcomplete', 'pygments'],
     extras_require={'test': ['pytest', 'pylint', 'pytest-cov']},
     entry_points={'console_scripts': ['dbgr = app:dbgr']}
 )
