@@ -23,7 +23,7 @@ def test_create_unsupported_type(cls):
         (int, True, 1),
         (int, '1', 1),
         (int, 1, 1),
-        (int, 1.0, 1),
+        (int, 1.9, 1),
         (float, False, 0.0),
         (float, True, 1),
         (float, '1', 1.0),
