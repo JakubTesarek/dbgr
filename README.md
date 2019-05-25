@@ -1,3 +1,6 @@
+[![PyPI version](https://badge.fury.io/py/dbgr.svg)](https://badge.fury.io/py/dbgr)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
 # DBGR
 Dbgr [read 'ˌdiːˈbʌɡər'] is a terminal tool to test and debug HTTP APIs.
 
