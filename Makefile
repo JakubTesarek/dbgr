@@ -1,5 +1,5 @@
 all:
-	@echo 'make clean | build | test'
+	@echo 'make clean | build | publish_test | publish | test'
 
 clean:
 	rm -rf *.pyc __pycache__
@@ -17,4 +17,4 @@ publish:
 	twine upload dist/*
 
 test:
-	python -m pytest
+	py.test tests/* -v
