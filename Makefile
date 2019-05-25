@@ -17,7 +17,7 @@ publish:
 	twine upload dist/*
 
 test:
-	py.test tests/* -v \
+	py.test tests/* \
 		--cov dbgr \
 		--cov-config .coveragerc \
 		--cov-report html \
