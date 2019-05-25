@@ -1,5 +1,5 @@
 all:
-	@echo 'make clean | build | publish_test | publish | test'
+	@echo 'make clean | build | publish_test | publish | test | changelog'
 
 clean:
 	rm -rf *.pyc __pycache__
@@ -23,3 +23,6 @@ test:
 		--cov-report html \
 		--cov-report term \
 		--cov-fail-under=100
+
+changelog:
+	git log --pretty=format:"%s" --reverse `git describe --tags --abbrev=0`..HEAD
