@@ -26,7 +26,9 @@ class Type:
     def cast(self, value):
         if value is not None and self:
             if self.cls == bool:
-                return value.lower() not in [0, 'f', 'false', 'n', 'no']
+                if isinstance(value, str):
+                    value = value.lower()
+                return value not in [0, 0.0, '0', False, 'f', 'false', 'n', 'no']
             return self.cls(value)
         return value
 
