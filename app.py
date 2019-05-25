@@ -133,11 +133,13 @@ async def main():
     else:
         parser.print_usage()
 
-
-if __name__ == '__main__':
+def dbgr():
     try:
         exit(asyncio.run(main()))
     except KeyboardInterrupt:
         print('')
     except Exception as e:
         print(f'{colorama.Fore.RED}{e}')
+
+if __name__ == '__main__':
+    dbgr()
