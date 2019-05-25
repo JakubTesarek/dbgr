@@ -57,3 +57,9 @@ def test_cannot_cast_strings_to_int():
     t = Type(int)
     with pytest.raises(ValueError):
         assert t.cast('string')
+
+
+def test_cannot_cast_float_like_strings_to_int():
+    t = Type(int)
+    with pytest.raises(ValueError):
+        assert t.cast('3.14')
