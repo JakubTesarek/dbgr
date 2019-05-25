@@ -1,4 +1,8 @@
 p3.7
+
+.coverage
+htmlcov
+
 build
 dbgr.egg-info
 dist
