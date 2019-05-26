@@ -1,19 +1,35 @@
 import inspect
-import colorama
 import os
 import importlib.util
 import glob
 from dataclasses import dataclass
 from pprint import pformat
+import colorama
+
 
 _REQUESTS = None
 _CACHE = {}
 
-class RequestNotFoundError(ValueError): pass
-class RequestNotImplementsError(RequestNotFoundError): pass
-class AmbiguousRequestNameError(RequestNotFoundError): pass
-class InvalidRequestNameError(ValueError): pass
-class DuplicateRequestNameError(ValueError): pass
+
+class RequestNotFoundError(ValueError):
+    pass
+
+
+class RequestNotImplementsError(RequestNotFoundError):
+    pass
+
+
+class AmbiguousRequestNameError(RequestNotFoundError):
+    pass
+
+
+class InvalidRequestNameError(ValueError):
+    pass
+
+
+class DuplicateRequestNameError(ValueError):
+    pass
+
 
 class Type:
     supported_types = ['bool', 'str', 'int', 'float']
@@ -80,19 +96,19 @@ class Argument:
         except:
             print(f'{colorama.Fore.RED}String "{value}" cannot be converted to {self.annotation}')
             raise
-        
+
     def value_input(self, nullable=False):
         value = input(f'{self}: ')
         if nullable and value == '':
             return None
         try:
             return self.cast(value)
-        except:
+        except TypeError:
             return self.value_input(nullable)
 
 
 class NoDefaultValueArgument(Argument):
-    def get_value(self, kwargs, use_default=None):
+    def get_value(self, kwargs, use_default=None): # pylint: disable=W0613
         if self.name in kwargs:
             return self.cast(kwargs[self.name])
         return self.value_input()
@@ -111,7 +127,7 @@ class DefaultValueArgument(Argument):
     def get_value(self, kwargs, use_default=False):
         if self.name in kwargs:
             value = self.cast(kwargs[self.name])
-        elif use_default == True:
+        elif use_default:
             value = self.value
         else:
             value = self.value_input(nullable=True)
@@ -136,6 +152,7 @@ class Request:
     def doc(self):
         if self.request.__doc__ is not None:
             return self.request.__doc__.strip()
+        return ''
 
     @property
     def extra_arguments(self):
@@ -159,14 +176,13 @@ class Request:
             )
         return arguments
 
-    async def __call__(
-        self, env, session, use_defaults=False, cache=True, kwargs={}
-    ):
+    async def __call__(self, env, session, use_defaults=False, cache=True, kwargs=None): # pylint: disable=R0913
+        kwargs = {} if kwargs is None else kwargs
         arguments = self.resolve_arguments(use_defaults, kwargs)
         if self.cache:
             cached = True
             key = (self.name, self.module, frozenset(arguments))
-            if key not in _CACHE or cache == False:
+            if key not in _CACHE or not cache:
                 cached = False
                 _CACHE[key] = await self.request(env, session, **arguments)
             return Result(_CACHE[key], self.annotation, cached)
@@ -185,21 +201,21 @@ class Request:
             )
 
     def __str__(self):
-        buffer = f'- {self.name}\n'
+        buff = f'- {self.name}\n'
         if self.annotation or self.cache:
-            b1, b2 = '', ''
+            buff_1, buff_2 = '', ''
             if self.cache:
-                b1 = f'cache: {self.cache}'
+                buff_1 = f'cache: {self.cache}'
             if self.annotation:
-                b2 = f'return: {self.annotation}'
-            buffer += f'  {colorama.Style.DIM}[{b1}{", " if b1 and b2 else ""}{b2}]\n'
+                buff_2 = f'return: {self.annotation}'
+            buff += f'  {colorama.Style.DIM}[{buff_1}{", " if buff_1 and buff_2 else ""}{buff_2}]\n'
         if self.doc:
-            buffer += f'  {colorama.Style.DIM}{self.doc}\n'
+            buff += f'  {colorama.Style.DIM}{self.doc}\n'
         if self.extra_arguments:
-            buffer += f'  {colorama.Style.DIM}Arguments:\n'
+            buff += f'  {colorama.Style.DIM}Arguments:\n'
             for argument in self.extra_arguments:
-                buffer += f'   {colorama.Style.DIM}- {argument}\n'
-        return buffer
+                buff += f'   {colorama.Style.DIM}- {argument}\n'
+        return buff
 
 
 def get_requests():
@@ -220,8 +236,7 @@ def parse_cmd_arguments(args):
 
 
 async def execute_request(
-    session, environment, request, use_defaults=False, cache=True, **kwargs
-):
+        session, environment, request, use_defaults=False, cache=True, **kwargs):
     request = find_request(request)
     result = await request(
         environment, session, use_defaults=use_defaults, cache=cache, kwargs=kwargs)
@@ -241,7 +256,7 @@ def load_module(module_path):
 
 
 def load_requests():
-    global _REQUESTS
+    global _REQUESTS # pylint: disable=W0603
     _REQUESTS = {}
     for module_path in glob.glob(f'{os.getcwd()}/*.py'):
         load_module(module_path)
@@ -257,7 +272,7 @@ def find_request(request_name):
     request = request_name
     module = None
     if ':' in request:
-       module, request = name.split(':', 1)
+        module, request = request.split(':', 1)
 
     requests = get_requests()
     if module:
@@ -266,20 +281,17 @@ def find_request(request_name):
         if request not in requests[module]:
             raise RequestNotImplementsError(f'Request "{request_name}" does not exist.')
         return requests[module][request]
-    else:
-        adepts = set()
-        for _, requests in requests.items():
-            for _, r in requests.items():
-                if r.name == request:
-                    if r.module == module:
-                        return r
-                    elif module is None:
-                        adepts.add(r)
-        if len(adepts) == 1:
-            return adepts.pop()
-        if len(adepts) == 0:
-            raise RequestNotImplementsError(f'Request "{request_name}" does not exist')
-        raise AmbiguousRequestNameError(
-            f'Request "{request_name}" found in multiple modules: '
-            f'{", ".join([r.module for r in adepts])}'
-        )
+
+    adepts = set()
+    for _, requests in requests.items():
+        for _, adept in requests.items():
+            if adept.name == request:
+                adepts.add(adept)
+    if len(adepts) == 1:
+        return adepts.pop()
+    if not adepts:
+        raise RequestNotImplementsError(f'Request "{request_name}" does not exist')
+    raise AmbiguousRequestNameError(
+        f'Request "{request_name}" found in multiple modules: '
+        f'{", ".join([r.module for r in adepts])}'
+    )

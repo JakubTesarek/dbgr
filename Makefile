@@ -16,6 +16,9 @@ publish:
 	twine check dist/*
 	twine upload dist/*
 
+lint:
+	pylint app.py dbgr
+
 test:
 	py.test tests/* \
 		--cov dbgr \

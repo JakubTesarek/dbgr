@@ -12,10 +12,9 @@ def request(name=None, cache=None):
         request = Request(func)
         register_request(request)
         return request
-    else:
-        @functools.wraps(func)
-        def decorator(func):
-            request = Request(func, name, cache)
-            register_request(request)
-            return request
-        return decorator
+    @functools.wraps(func)
+    def decorator(func):
+        request = Request(func, name, cache)
+        register_request(request)
+        return request
+    return decorator

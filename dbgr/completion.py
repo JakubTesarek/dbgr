@@ -17,7 +17,7 @@ class Completer:
 
 class EnvironmentsCompleter:
     def get_choices(self):
-        return tupe(get_environments())
+        return tuple(get_environments())
 
 
 class RequestsCompleter(Completer):

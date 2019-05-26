@@ -4,15 +4,14 @@
 DBGR is a tool for testing and debugging HTTP APIs.
 '''
 
-import readline
 import asyncio
 import argparse
-import argcomplete
-import colorama
 import sys
 import traceback
 import textwrap
-from dbgr.requests import get_requests, execute_request, RequestNotFoundError, parse_cmd_arguments
+import argcomplete
+import colorama
+from dbgr.requests import get_requests, execute_request, parse_cmd_arguments
 from dbgr.environment import Environment, get_environments
 from dbgr.session import get_session
 from dbgr.completion import RequestsCompleter, ModulesCompleter, EnvironmentsCompleter
@@ -25,14 +24,14 @@ async def prepare_and_execute_request(request, args):
         arguments = parse_cmd_arguments(args.arguments)
         await execute_request(
             session, environment, request, use_defaults=args.use_defaults, **arguments)
-    except AssertionError as e:
-        _, _, tb = sys.exc_info()
-        tb_info = traceback.extract_tb(tb)
-        filename, line, func, text = tb_info[-1]
+    except AssertionError:
+        _, _, trace = sys.exc_info()
+        trace_info = traceback.extract_tb(trace)
+        filename, line, function, text = trace_info[-1] # pylint: disable=W0612
         print(f'{colorama.Fore.RED}Assertion error in {filename}:{line}:')
         print(f'{colorama.Fore.RED}{text}')
-    except Exception as e:
-        print(f'{colorama.Fore.RED}{e}')
+    except Exception as ex:
+        print(f'{colorama.Fore.RED}{ex}')
     finally:
         await session.close()
 
@@ -59,7 +58,7 @@ async def list_command(args):
                 print(textwrap.indent(str(request), ' '), end='')
 
 
-async def environments_command(args):
+async def environments_command(args): # pylint: disable=W0613
     ''' List all available environments '''
     for env in get_environments():
         print(f'- {env}')
@@ -81,7 +80,7 @@ async def main():
     int_parser.add_argument(
         '-e', '--env', default='default',
         help='Environment that will be used (default: "default")'
-    ).completer=EnvironmentsCompleter()
+    ).completer = EnvironmentsCompleter()
     int_parser.add_argument(
         '-d', '--use-defaults', action='store_true',
         help='Use default values when possible')
@@ -95,11 +94,11 @@ async def main():
     req_parser.add_argument(
         'request',
         help='Name of the request to execute'
-    ).completer=RequestsCompleter()
+    ).completer = RequestsCompleter()
     req_parser.add_argument(
         '-e', '--env', default='default',
         help='Environment that will be used'
-    ).completer=EnvironmentsCompleter()
+    ).completer = EnvironmentsCompleter()
     req_parser.add_argument(
         '-d', '--use-defaults', action='store_true',
         help='Use default values when possible')
@@ -116,7 +115,7 @@ async def main():
         'module',
         nargs='?',
         help='Filter requests by module'
-    ).completer=ModulesCompleter()
+    ).completer = ModulesCompleter()
     list_parser.set_defaults(func=list_command)
 
     environments_parser = subparsers.add_parser(
@@ -138,8 +137,8 @@ def dbgr():
         exit(asyncio.run(main()))
     except KeyboardInterrupt:
         print('')
-    except Exception as e:
-        print(f'{colorama.Fore.RED}{e}')
+    except Exception as ex:
+        print(f'{colorama.Fore.RED}{ex}')
 
 if __name__ == '__main__':
     dbgr()
