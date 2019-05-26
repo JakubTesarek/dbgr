@@ -6,7 +6,7 @@ from tests.conftest import escape_ansi
 
 def test_access_module_and_name(monkeypatch):
     monkeypatch.setattr(dbgr.requests, 'get_requests', lambda: {})
-    def func(env, session):
+    async def func(env, session):
         pass
 
     req = Request(func)
@@ -16,7 +16,7 @@ def test_access_module_and_name(monkeypatch):
 
 def test_access_module_and_alternative_name(monkeypatch):
     monkeypatch.setattr(dbgr.requests, 'get_requests', lambda: {})
-    def func(env, session):
+    async def func(env, session):
         pass
 
     req = Request(func, 'alternative_name')
@@ -25,7 +25,7 @@ def test_access_module_and_alternative_name(monkeypatch):
 
 
 def test_invalid_name(monkeypatch):
-    def func(env, session):
+    async def func(env, session):
         pass
 
     with pytest.raises(dbgr.requests.InvalidRequestNameError):
@@ -36,7 +36,7 @@ def test_duplicit_name(monkeypatch):
     monkeypatch.setattr(
         dbgr.requests, 'get_requests', lambda: {__name__: {'func': lambda: None}}
     )
-    def func(env, session):
+    async def func(env, session):
         pass
 
     with pytest.raises(dbgr.requests.DuplicateRequestNameError):
@@ -45,7 +45,7 @@ def test_duplicit_name(monkeypatch):
 
 def test_get_doc(monkeypatch):
     monkeypatch.setattr(dbgr.requests, 'get_requests', lambda: {})
-    def func(env, session):
+    async def func(env, session):
         ''' Docstring '''
         pass
 
@@ -54,7 +54,7 @@ def test_get_doc(monkeypatch):
 
 def test_get_empty_docstring(monkeypatch):
     monkeypatch.setattr(dbgr.requests, 'get_requests', lambda: {})
-    def func(env, session):
+    async def func(env, session):
         pass
 
     assert Request(func).doc == ''
@@ -62,7 +62,7 @@ def test_get_empty_docstring(monkeypatch):
 
 def test_get_extra_arguments(monkeypatch):
     monkeypatch.setattr(dbgr.requests, 'get_requests', lambda: {})
-    def func(env, session, arg_1, arg_2: int, arg_3='def3', arg_4: str='def4'):
+    async def func(env, session, arg_1, arg_2: int, arg_3='def3', arg_4: str='def4'):
         pass
 
     extras = Request(func).extra_arguments
@@ -97,7 +97,7 @@ def test_get_extra_arguments(monkeypatch):
 
 def test_resolve_arguments_passed(monkeypatch):
     monkeypatch.setattr(dbgr.requests, 'get_requests', lambda: {})
-    def func(env, session, arg_1):
+    async def func(env, session, arg_1):
         pass
 
     args = Request(func).resolve_arguments(False, {'arg_1': 123})
@@ -106,7 +106,7 @@ def test_resolve_arguments_passed(monkeypatch):
 
 def test_resolve_arguments_use_default(monkeypatch):
     monkeypatch.setattr(dbgr.requests, 'get_requests', lambda: {})
-    def func(env, session, arg_1='default'):
+    async def func(env, session, arg_1='default'):
         pass
 
     args = Request(func).resolve_arguments(True, {})
@@ -115,7 +115,7 @@ def test_resolve_arguments_use_default(monkeypatch):
 
 def test_resolve_arguments_defaults_dont_overwrite_passed(monkeypatch):
     monkeypatch.setattr(dbgr.requests, 'get_requests', lambda: {})
-    def func(env, session, arg_1='default'):
+    async def func(env, session, arg_1='default'):
         pass
 
     args = Request(func).resolve_arguments(True, {'arg_1': 'passed'})
@@ -125,7 +125,7 @@ def test_resolve_arguments_defaults_dont_overwrite_passed(monkeypatch):
 def test_prompts_for_missing_values(monkeypatch):
     monkeypatch.setattr(dbgr.requests, 'get_requests', lambda: {})
     monkeypatch.setattr(NoDefaultValueArgument, 'get_value', lambda *_, **__: 'input')
-    def func(env, session, arg_1):
+    async def func(env, session, arg_1):
         pass
 
     req = Request(func)
@@ -135,14 +135,14 @@ def test_prompts_for_missing_values(monkeypatch):
 
 def test_format_bare(monkeypatch):
     monkeypatch.setattr(dbgr.requests, 'get_requests', lambda: {})
-    def func(env, session):
+    async def func(env, session):
         pass
     assert escape_ansi(Request(func)) == '- func\n'
 
 
 def test_format_bare_pydoc(monkeypatch):
     monkeypatch.setattr(dbgr.requests, 'get_requests', lambda: {})
-    def func(env, session):
+    async def func(env, session):
         ''' Pydoc '''
         pass
     assert escape_ansi(Request(func)) == '- func\n  Pydoc\n'
@@ -150,7 +150,7 @@ def test_format_bare_pydoc(monkeypatch):
 
 def test_format_arguments(monkeypatch):
     monkeypatch.setattr(dbgr.requests, 'get_requests', lambda: {})
-    def func(env, session, arg_1, arg_2: int, arg_3: int=3, arg_4=4):
+    async def func(env, session, arg_1, arg_2: int, arg_3: int=3, arg_4=4):
         pass
     assert escape_ansi(Request(func)) == (
         '- func\n'
@@ -164,7 +164,7 @@ def test_format_arguments(monkeypatch):
 
 def test_format_cached(monkeypatch):
     monkeypatch.setattr(dbgr.requests, 'get_requests', lambda: {})
-    def func(env, session):
+    async def func(env, session):
         ''' Pydoc '''
         pass
     req = Request(func, cache='session')
@@ -177,7 +177,7 @@ def test_format_cached(monkeypatch):
 
 def test_format_typed(monkeypatch):
     monkeypatch.setattr(dbgr.requests, 'get_requests', lambda: {})
-    def func(env, session) -> int:
+    async def func(env, session) -> int:
         ''' Pydoc '''
         pass
     req = Request(func)
@@ -189,7 +189,7 @@ def test_format_typed(monkeypatch):
 
 def test_format_cached_and_typed(monkeypatch):
     monkeypatch.setattr(dbgr.requests, 'get_requests', lambda: {})
-    def func(env, session) -> int:
+    async def func(env, session) -> int:
         ''' Pydoc '''
         pass
     req = Request(func, cache='session')
@@ -198,3 +198,13 @@ def test_format_cached_and_typed(monkeypatch):
         '  [cache: session, return: int]\n'
         '  Pydoc\n'
     )
+
+
+@pytest.mark.asyncio
+async def test_bare_call(monkeypatch):
+    monkeypatch.setattr(dbgr.requests, 'get_requests', lambda: {})
+    async def func(env, session):
+        return 'result'
+    req = Request(func)
+    res = await req(None, None)
+    assert  res.value == 'result'
