@@ -1,6 +1,7 @@
 import pytest
 import dbgr.requests
 from dbgr.requests import Request, DefaultValueArgument, NoDefaultValueArgument
+from tests.conftest import escape_ansi
 
 
 def test_access_module_and_name(monkeypatch):
@@ -130,3 +131,70 @@ def test_prompts_for_missing_values(monkeypatch):
     req = Request(func)
     args = req.resolve_arguments(False, {})
     assert args == {'arg_1': 'input'}
+
+
+def test_format_bare(monkeypatch):
+    monkeypatch.setattr(dbgr.requests, 'get_requests', lambda: {})
+    def func(env, session):
+        pass
+    assert escape_ansi(Request(func)) == '- func\n'
+
+
+def test_format_bare_pydoc(monkeypatch):
+    monkeypatch.setattr(dbgr.requests, 'get_requests', lambda: {})
+    def func(env, session):
+        ''' Pydoc '''
+        pass
+    assert escape_ansi(Request(func)) == '- func\n  Pydoc\n'
+
+
+def test_format_arguments(monkeypatch):
+    monkeypatch.setattr(dbgr.requests, 'get_requests', lambda: {})
+    def func(env, session, arg_1, arg_2: int, arg_3: int=3, arg_4=4):
+        pass
+    assert escape_ansi(Request(func)) == (
+        '- func\n'
+        '  Arguments:\n'
+        '   - arg_1\n'
+        '   - arg_2 [type: int]\n'
+        '   - arg_3 [default: 3, type: int]\n'
+        '   - arg_4 [default: 4]\n'
+    )
+
+
+def test_format_cached(monkeypatch):
+    monkeypatch.setattr(dbgr.requests, 'get_requests', lambda: {})
+    def func(env, session):
+        ''' Pydoc '''
+        pass
+    req = Request(func, cache='session')
+    assert escape_ansi(req) == (
+        '- func\n'
+        '  [cache: session]\n'
+        '  Pydoc\n'
+    )
+
+
+def test_format_typed(monkeypatch):
+    monkeypatch.setattr(dbgr.requests, 'get_requests', lambda: {})
+    def func(env, session) -> int:
+        ''' Pydoc '''
+        pass
+    req = Request(func)
+    assert escape_ansi(req) == (
+        '- func\n'
+        '  [return: int]\n'
+        '  Pydoc\n'
+    )
+
+def test_format_cached_and_typed(monkeypatch):
+    monkeypatch.setattr(dbgr.requests, 'get_requests', lambda: {})
+    def func(env, session) -> int:
+        ''' Pydoc '''
+        pass
+    req = Request(func, cache='session')
+    assert escape_ansi(req) == (
+        '- func\n'
+        '  [cache: session, return: int]\n'
+        '  Pydoc\n'
+    )
