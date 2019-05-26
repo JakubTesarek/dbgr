@@ -181,7 +181,7 @@ class Request:
         arguments = self.resolve_arguments(use_defaults, kwargs)
         if self.cache:
             cached = True
-            key = (self.name, self.module, frozenset(arguments))
+            key = (self.name, self.module, frozenset(arguments.items()))
             if key not in _CACHE or not cache:
                 cached = False
                 _CACHE[key] = await self.request(env, session, **arguments)
