@@ -103,7 +103,7 @@ class Argument:
             return None
         try:
             return self.cast(value)
-        except TypeError:
+        except ValueError:
             return self.value_input(nullable)
 
 

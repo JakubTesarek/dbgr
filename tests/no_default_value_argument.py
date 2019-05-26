@@ -27,7 +27,7 @@ def test_prompts_for_value(monkeypatch):
 
 
 def test_prompts_for_value_until_given(monkeypatch):
-    inputs = ['', '', 'string']
-    monkeypatch.setattr('builtins.input', lambda _: inputs.pop())
-    a = NoDefaultValueArgument('name', Type(str))
-    assert a.get_value({}) == 'string'
+    inputs = ['', '', '2']
+    monkeypatch.setattr('builtins.input', lambda _: inputs.pop(0))
+    a = NoDefaultValueArgument('name', Type(int))
+    assert a.get_value({}) == 2
