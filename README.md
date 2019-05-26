@@ -99,6 +99,12 @@ $ dbgr r many_arguments -a arg1=foo -a arg3=bar
 arg2:
 ```
 
+Arguments mentioned in command without value are assumed to be flags and will be resolve to `True`:
+
+```
+$ dbgr r request -a arg1 # Arg1 == True
+```
+
 When you call DBGR with `-d` or `--use-defaults` swith, you will be prompted only for arguments without default values:
 
 ```
