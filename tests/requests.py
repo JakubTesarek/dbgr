@@ -11,5 +11,4 @@ def test_parse_cmd_arguments():
 
 
 def test_cmd_arguments_without_value_resolved_to_true():
-    args = ['arg1']
-    assert parse_cmd_arguments(args) == {'arg1': True}
+    assert parse_cmd_arguments(['arg1']) == {'arg1': True}
