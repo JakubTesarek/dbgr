@@ -17,6 +17,7 @@ setup(
     python_requires='>=3.7',
     description='REST API testing tool',
     long_description=long_description,
+    long_description_content_type='text/markdown',
     url='https://github.com/JakubTesarek/dbgr',
     author='Jakub Tesárek',
     author_email='jakub@tesarek.me',
