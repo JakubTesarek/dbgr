@@ -77,7 +77,7 @@ async def many_arguments(env, session, arg1, arg2, arg3='foo'):
     pass
 ```
 
-When you call this request from terminal, you will be prompted for all 3 arguments. For `a3` you will be offered to use default value:
+When you call this request from terminal, you will be prompted for all 3 arguments. For `arg3` you will be offered to use default value:
 
 ```
 $ dbgr r many_arguments
@@ -102,7 +102,7 @@ arg2:
 Arguments mentioned in command without value are assumed to be flags and will be resolve to `True`:
 
 ```
-$ dbgr r request -a arg1 # Arg1 == True
+$ dbgr r request -a arg1 # arg1 == True
 ```
 
 When you call DBGR with `-d` or `--use-defaults` swith, you will be prompted only for arguments without default values:
@@ -203,7 +203,7 @@ async def get_comments(env, session):
     data = session.get('/comments', headers={'Authorization': f'Bearer {auth["token"}'})
 ```
 
-> DBGR doens't try to detect reccursion. Be carefull not to unintentionaly cause DDoS on your (or some elses) servers.
+> DBGR doens't detect reccursion. Be carefull not to unintentionaly cause DDoS on your (or some elses) servers.
 
 
 ### Arguments
@@ -267,7 +267,7 @@ async def list_comments(env, session):
 
 
 ## Asserts
-DBGR supports assertions in requests. If a assert fails, it will get reported to the terminal.
+DBGR supports assertions in requests. If an assert fails, it will get reported to the terminal.
 
 ```
 @request
