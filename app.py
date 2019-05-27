@@ -18,6 +18,12 @@ from dbgr.session import get_session
 from dbgr.completion import RequestsCompleter, ModulesCompleter, EnvironmentsCompleter
 
 
+def version_command():
+    ''' Display version of DBGR '''
+    from dbgr.meta import __version__
+    print(__version__)
+
+
 async def prepare_and_execute_request(request, args):
     try:
         session = get_session()
@@ -70,6 +76,9 @@ async def main():
         prog='dbgr',
         description=__doc__,
         formatter_class=argparse.RawTextHelpFormatter
+    )
+    parser.add_argument(
+        '-v', '--version', action='store_true', help=version_command.__doc__
     )
     subparsers = parser.add_subparsers(help='Command to execute')
 
@@ -130,6 +139,8 @@ async def main():
     colorama.init(autoreset=True)
     if hasattr(args, 'func'):
         await args.func(args)
+    elif args.version:
+        version_command()
     else:
         parser.print_usage()
 

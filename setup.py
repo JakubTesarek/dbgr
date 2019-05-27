@@ -1,5 +1,6 @@
 from setuptools import setup, find_packages
 from os import path
+from dbgr.meta import __version__
 
 with open('requirements.txt') as fp:
     install_requires = fp.read()
@@ -12,7 +13,7 @@ with open('README.md') as readme:
 
 setup(
     name='dbgr',
-    version='1.0.0',
+    version=__version__,
     python_requires='>=3.7',
     description='REST API testing tool',
     long_description=long_description,
