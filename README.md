@@ -8,6 +8,25 @@ Dbgr [read 'ˌdiːˈbʌɡər'] is a terminal tool to test and debug HTTP APIs.
 
 It is a alternative to [Postman](https://www.getpostman.com/) or [Insomnia](https://insomnia.rest/). DBGR strives to give you better control over the requests that and at the same time allow you to write your own python code to process the results.
 
+
+## Content
+* [Installation and dependencies](#installation-and-dependencies)
+  * [Development setup](#development-setup)
+* [Project setup](#project-setup)
+* [Requests](#requests)
+  * [Names](#names)
+* [Arguments](#arguments)
+  * [Order of precedence of arguments](#order-of-precedence-of-arguments)
+  * [Types annotations](#types-annotations)
+* [Return value](#return-value)
+* [Environment](#environment)
+* [Recursive calls](#recursive-calls)
+  * [Arguments](#arguments-1)
+* [Caching](#caching)
+* [Asserts](#asserts)
+* [Autocomplete and History](#autocomplete-and-history)
+
+
 ## Installation and dependencies
 The easiest way to install DBGR is via [pypi](https://pypi.org/project/dbgr/).
 
