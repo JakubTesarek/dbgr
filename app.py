@@ -4,6 +4,7 @@
 DBGR is a tool for testing and debugging HTTP APIs.
 '''
 
+import readline # pylint: disable=W0611
 import asyncio
 import argparse
 import sys
