@@ -3,13 +3,15 @@ import pytest
 import dbgr.requests
 from dbgr.requests import (
     parse_cmd_arguments, get_requests, extract_module_name, Request, find_request,
-    RequestNotImplementsError, AmbiguousRequestNameError
+    RequestNotImplementsError, AmbiguousRequestNameError, register_request
 )
 
 
-def _mocked_request(name):
+def _mocked_request(name, module=None):
     async def test_request():
         pass
+    if module:
+        test_request.__module__ = module
     return Request(test_request, name=name)
 
 
@@ -115,3 +117,34 @@ def test_find_request_multiple_adepts(monkeypatch):
     }
     monkeypatch.setattr(dbgr.requests, 'get_requests', lambda: requests)
     assert find_request('request1') == req1
+
+
+def test_register_request(monkeypatch):
+    requests = {}
+    monkeypatch.setattr(dbgr.requests, '_REQUESTS', requests)
+    req = _mocked_request('request', module='module')
+    register_request(req)
+    assert requests == {'module': {'request': req}}
+
+
+def test_register_multiple_requests_same_module(monkeypatch):
+    requests = {}
+    monkeypatch.setattr(dbgr.requests, '_REQUESTS', requests)
+    req1 = _mocked_request('request1', module='module')
+    req2 = _mocked_request('request2', module='module')
+    register_request(req1)
+    register_request(req2)
+    assert requests == {'module': {'request1': req1, 'request2': req2}}
+
+
+def test_register_multiple_requests_different_module(monkeypatch):
+    requests = {}
+    monkeypatch.setattr(dbgr.requests, '_requests', requests)
+    req1 = _mocked_request('request', module='module1')
+    req2 = _mocked_request('request', module='module2')
+    register_request(req1)
+    register_request(req2)
+    assert requests == {
+        'module1': {'request': req1},
+        'module2': {'request': req2}
+    }
