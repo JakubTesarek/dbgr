@@ -139,7 +139,7 @@ def test_register_multiple_requests_same_module(monkeypatch):
 
 def test_register_multiple_requests_different_module(monkeypatch):
     requests = {}
-    monkeypatch.setattr(dbgr.requests, '_requests', requests)
+    monkeypatch.setattr(dbgr.requests, '_REQUESTS', requests)
     req1 = _mocked_request('request', module='module1')
     req2 = _mocked_request('request', module='module2')
     register_request(req1)
