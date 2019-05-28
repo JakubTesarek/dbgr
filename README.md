@@ -36,17 +36,7 @@ pip install dbgr
 
 DBGR requires Python 3.7. Also, if you want to use terminal autocompletion, you need appropriet bash version or [setup your shell](#autocomplete_and_history).
 
-### Development setup
-If you want to develop DBGR itself, you may want to install it directly from local directory:
-
-```
-$ git clone https://github.com/JakubTesarek/dbgr
-$ cd dbgr
-$ virtualenv p3.7 --python=python3.7
-$ source p3.7/bin/activate
-(p3.7) $ pip install -r requirements.txt -r requirements-dev.py
-(p3.7) $ pip install -e .
-```
+> For alternative ways of installation, see [CONTRIBUTORS.md](CONTRIBUTORS.md).
 
 
 ## Project setup
