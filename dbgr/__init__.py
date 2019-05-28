@@ -2,8 +2,8 @@ import functools
 from dbgr.requests import register_request, execute_request, Request
 
 
-async def response(request, env, session):
-    return await execute_request(session, env, request)
+async def response(request, env, session, **kwargs):
+    return await execute_request(session, env, request, **kwargs)
 
 
 def request(name=None, cache=None):
