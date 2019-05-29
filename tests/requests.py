@@ -3,7 +3,8 @@ import pytest
 import dbgr.requests
 from dbgr.requests import (
     parse_cmd_arguments, get_requests, extract_module_name, Request, find_request,
-    RequestNotImplementsError, AmbiguousRequestNameError, register_request
+    RequestNotImplementsError, AmbiguousRequestNameError, register_request,
+    parse_module_name, parse_request_name
 )
 
 
@@ -47,9 +48,6 @@ def test_get_requests_loads_requests_once(monkeypatch):
 ])
 def test_extract_module_name(path, name):
     assert extract_module_name(path) == name
-
-
-
 
 def test_find_request_by_name(monkeypatch):
     req = _mocked_request('request')
@@ -148,3 +146,22 @@ def test_register_multiple_requests_different_module(monkeypatch):
         'module1': {'request': req1},
         'module2': {'request': req2}
     }
+
+@pytest.mark.parametrize('name, result', [
+    ('module:request', ('module', 'request')),
+    ('module', ('module', None)),
+    (None, (None, None)),
+    (':request', (None, 'request')),
+])
+def test_parse_module_name(name, result):
+    assert parse_module_name(name) == result
+
+
+@pytest.mark.parametrize('name, result', [
+    ('module:request', ('module', 'request')),
+    ('request', (None, 'request')),
+    (None, (None, None)),
+    (':request', (None, 'request')),
+])
+def test_parse_request_name(name, result):
+    assert parse_request_name(name) == result

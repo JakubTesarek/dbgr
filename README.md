@@ -15,6 +15,7 @@ It is a alternative to [Postman](https://www.getpostman.com/) or [Insomnia](http
 * [Project setup](#project-setup)
 * [Requests](#requests)
   * [Names](#names)
+  * [Listing requests](#listing-requests)
 * [Arguments](#arguments)
   * [Order of precedence of arguments](#order-of-precedence-of-arguments)
   * [Types annotations](#types-annotations)
@@ -76,6 +77,21 @@ And then you'll execute it with its alternative name `$ dbgr r different_name`.
 > Name of a request can contain only letters, numbers and/or underscores. Names are case sensitive.
 
 DBGR automatically loads requests from all .py files in working directory. This can lead to collisions in names. Therefore you can execute the endpoint with fully qualified name including module name: `$ dbgr r module:function`. Module name is simply the name of the file without extension.
+
+### Listing requests
+DBGR has a command to list all registered commnads: `dbgr list-requests` or `dbgr l`. It accepts optional argument with module name: `dbgr l placeholder`. If you use it, DBGR will list only request from that module. If you only want to see details of one request, you can also use fully qualified request name `dbgr l placeholder:post`.
+
+If you are looking for a request but you don't know which module it's in, you can omit the module name and just prefix the request with `:`, like this: `dbgr l :users`. DBGR will then list all requests named `users` from all modules.
+
+```
+$ dbgr list-requests :users
+placeholder:
+ - users
+   Retrieve all users
+github:
+ - users
+   List all user that have access to my repository
+```
 
 ## Arguments
 When defining your request, you can specify any number of arguments that it will accept (besides env and session). These arguments will be filled with values specified when you call your request. If you don't provide them in the terminal, DBGR will prompt you for value. You can also define default values for some or all arguments.

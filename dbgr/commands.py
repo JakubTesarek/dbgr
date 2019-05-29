@@ -3,7 +3,7 @@ import sys
 import traceback
 import textwrap
 import colorama
-from dbgr.requests import get_requests, execute_request, parse_cmd_arguments
+from dbgr.requests import get_requests, execute_request, parse_cmd_arguments, parse_module_name
 from dbgr.environment import Environment, get_environments
 from dbgr.session import get_session
 from dbgr.completion import RequestsCompleter, ModulesCompleter, EnvironmentsCompleter
@@ -49,11 +49,16 @@ async def request_command(args):
 
 async def list_command(args):
     ''' List all available requests and their arguments '''
+    l_module, l_request = parse_module_name(args.module)
     for module, requests in get_requests().items():
-        if not args.module or module == args.module:
-            print(f'{colorama.Style.BRIGHT}{module}:')
+        module_printed = False
+        if not l_module or module == l_module:
             for request in requests.values():
-                print(textwrap.indent(str(request), ' '), end='')
+                if not l_request or request.name == l_request:
+                    if not module_printed:
+                        print(f'{colorama.Style.BRIGHT}{module}:')
+                        module_printed = True
+                    print(textwrap.indent(str(request), ' '), end='')
 
 
 async def environments_command(args): # pylint: disable=W0613
@@ -115,7 +120,10 @@ def argument_parser():
     list_parser.add_argument(
         'module',
         nargs='?',
-        help='Filter requests by module'
+        help=(
+            'Module name or fully qualified request name `module:request`. '
+            'Optinally you can omit the module name: `:request`'
+        )
     ).completer = ModulesCompleter()
     list_parser.set_defaults(func=list_command)
 

@@ -269,11 +269,7 @@ def register_request(request):
 
 
 def find_request(request_name):
-    request = request_name
-    module = None
-    if ':' in request:
-        module, request = request.split(':', 1)
-
+    module, request = parse_request_name(request_name)
     requests = get_requests()
     if module:
         if module not in requests:
@@ -295,3 +291,17 @@ def find_request(request_name):
         f'Request "{request_name}" found in multiple modules: '
         f'{", ".join([r.module for r in adepts])}'
     )
+
+
+def parse_module_name(module):
+    request = None
+    if module and ':' in module:
+        module, request = module.split(':', 1)
+    return None if module == '' else module, request
+
+
+def parse_request_name(request):
+    module = None
+    if request and ':' in request:
+        module, request = request.split(':', 1)
+    return None if module == '' else module, None if request == '' else request
