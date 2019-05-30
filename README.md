@@ -188,7 +188,41 @@ If you use default value by pressing enter without any input, DBGR will not chec
 
 DBGR currently supports these type: `int`, `float`, `bool`, `str`. Every other annotation type will be ignored.
 
+#### Boolean type
 Booleans are handled in a special way. Values `0`, `f`, `false`, `n`, `no` (and their variants in different case) will be converted to `False`, everything else will be converted to `True`.
+
+#### Secret type
+Requests can also prompt you for password. For that, use type `secret` from `dbgr` module:
+
+```
+from dbgr import request, secret
+
+@request
+async def login(env, session, username, password: secret):
+    await session.post('/login', data={'username': username, 'password': password})
+```
+
+DBGR will display password prompt for each field of type `secret`:
+
+```
+$ dbgr r login
+username: jakub@tesarek.me
+password [type: secret]: #will show nothing
+```
+
+Secret type can have default value too, just like any other argument. In terminal, it will be displayed obfuscated:
+```
+from dbgr import request, secret
+
+@request
+async def change_password(env, session, password: secret='SuperSecret'):
+    await session.post('/change_password', data={'password': password})
+```
+
+```
+$ dbgr r change_password
+password [default: S*********t, type: secret]:
+```
 
 
 ## Return value
@@ -205,6 +239,24 @@ async def count_comments(env, session) -> int:
     return len(resp.json())
 ```
 
+If your request returns [Secret Type](#secret-type), it will be obfuscated in the terminal output:
+
+```
+from dbgr import request, secret
+
+@request
+async def retrieve_password(env, session) -> secret:
+    res = await session.get('/get_password')
+    return await res.text()
+```
+
+```
+$ dbgr r retrieve password
+# request output
+Result (secret): S*******d
+```
+
+> **The secret information will still show in the request log if it's send as plaintext.**
 
 ## Environment
 Environments offer you different way to specify variables for your requests. Your default environment is placed in `default.ini`. This is a file in ini format using [ExtendedInterpolation](https://docs.python.org/3/library/configparser.html#configparser.ExtendedInterpolation).
