@@ -22,7 +22,10 @@ Dbgr [read 'ˌdiːˈbʌɡər'] is a interactive terminal tool to test and debug 
 * [Arguments](#arguments)
   * [Order of precedence of arguments](#order-of-precedence-of-arguments)
   * [Types annotations](#types-annotations)
+    * [Boolean type](#boolean-type)
+    * [Secret type](#secret-type)
 * [Return value](#return-value)
+  * [Secret return value](#secret-return-value)
 * [Environment](#environment)
 * [Recursive calls](#recursive-calls)
   * [Arguments](#arguments-1)
@@ -239,6 +242,7 @@ async def count_comments(env, session) -> int:
     return len(resp.json())
 ```
 
+### Secret return value
 If your request returns [Secret Type](#secret-type), it will be obfuscated in the terminal output:
 
 ```
