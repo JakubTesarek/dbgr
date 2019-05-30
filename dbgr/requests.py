@@ -1,3 +1,4 @@
+import getpass
 import inspect
 import os
 import importlib.util
@@ -56,6 +57,20 @@ class Type:
     def __bool__(self):
         return self.cls is not None
 
+    def value_input(self, prompt):
+        return input(f'{prompt}: ')
+
+
+class SecretType(Type):
+    def __init__(self):
+        super().__init__(str)
+
+    def value_input(self, prompt):
+        return getpass.getpass(f'{prompt}: ')
+
+    def __str__(self):
+        return 'secret'
+
 
 @dataclass
 class Result:
@@ -98,7 +113,7 @@ class Argument:
             raise
 
     def value_input(self, nullable=False):
-        value = input(f'{self}: ')
+        value = self.annotation.value_input(self)
         if nullable and value == '':
             return None
         try:
@@ -160,7 +175,11 @@ class Request:
         args_spec = inspect.getfullargspec(self.request)
         defaults = list(args_spec.defaults or [])
         for argument in args_spec.args[:1:-1]:
-            annotation = Type(args_spec.annotations.get(argument))
+            arg_class = args_spec.annotations.get(argument)
+            if issubclass(arg_class, Type): 
+                annotation = arg_class()
+            else:
+                annotation = Type(arg_class)
             if defaults:
                 arg = DefaultValueArgument(argument, annotation, defaults.pop())
             else:

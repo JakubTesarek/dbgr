@@ -1,5 +1,5 @@
 import functools
-from dbgr.requests import register_request, execute_request, Request
+from dbgr.requests import register_request, execute_request, Request, SecretType as secret
 
 
 async def response(request, env, session, **kwargs):
