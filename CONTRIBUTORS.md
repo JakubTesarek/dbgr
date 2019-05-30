@@ -41,15 +41,18 @@ dbgr() {
 This will create new function that will activate the Python environment, register autocompleter and run `dbgr/app.py` when you call it.
 
 
-## Tooling
-The file `Makefile` contains multiple commands that can be usefull when developing DBGR. Run `make` to see all the available commands.
-
-
 ## Testing
-To run all unit-tests, simply `make test`.
+`make test`
+> The file `Makefile` contains multiple commands that can be usefull when developing DBGR. Run `make` to see all the available commands.
 
-> `make test` also measures code coverage and fails when it's not 100%. This is done to remind me of the end goal to achieve 100% code test coverage. You can ignore it for now. Just make sure that all new changes are covered and overall coverage is raising.
+`make test` also measures code coverage and fails when it's not 100%. This is done to remind me of the end goal to achieve 100% code test coverage. You can ignore it for now. Just make sure that all new changes are covered and overall coverage is raising.
 
 
 ## Linting
-DBGR user pylint with some lints disabled. See `.pylintrc` for details. You can execute linter by running `make lint`. Score of 10.0 is required for all changes.
+`make lint`
+DBGR user pylint with some lints disabled. See `.pylintrc` for details. Score of 10.0 is required for all changes.
+
+
+## Links
+* [Travis-io build job](https://travis-ci.org/JakubTesarek/dbgr)
+* [Codev test coverage statistics](https://codecov.io/gh/JakubTesarek/dbgr)
