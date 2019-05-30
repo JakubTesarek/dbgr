@@ -1,4 +1,4 @@
-from dbgr.requests import DefaultValueArgument, Type
+from dbgr.requests import DefaultValueArgument, Type, SecretType
 from tests.conftest import escape_ansi
 
 def test_returns_given_value():
@@ -46,7 +46,13 @@ def test_passed_arguement_rewrites_default():
 def test_prompts_until_correct_type_given(monkeypatch, capsys):
     inputs = ['invalid', '2']
     monkeypatch.setattr('builtins.input', lambda _: inputs.pop(0))
-    a = DefaultValueArgument('name', Type(int), 'default')
+    a = DefaultValueArgument('name', Type(int), '3')
     assert a.get_value({}) == 2
     captured = capsys.readouterr()
     assert escape_ansi(captured.out) == 'String "invalid" cannot be converted to int\n'
+
+
+def test_prompts_for_secret_value(monkeypatch, capsys):
+    monkeypatch.setattr('getpass.getpass', lambda _: 'password')
+    a = DefaultValueArgument('name', SecretType(), 'default')
+    assert a.get_value({}) == 'password'

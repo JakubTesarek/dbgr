@@ -23,21 +23,21 @@ def test_create_sectet_type():
 
 
 @pytest.mark.parametrize('cls, value_in, value_out', [
-        (str, False, 'False'),
-        (str, 'str', 'str'),
-        (str, 1, '1'),
-        (str, .1, '0.1'),
-        (int, False, 0),
-        (int, True, 1),
-        (int, '1', 1),
-        (int, 1, 1),
-        (int, 1.9, 1),
-        (float, False, 0.0),
-        (float, True, 1),
-        (float, '1', 1.0),
-        (float, '1.0', 1),
-        (float, 1.0, 1.0)
-    ])
+    (str, False, 'False'),
+    (str, 'str', 'str'),
+    (str, 1, '1'),
+    (str, .1, '0.1'),
+    (int, False, 0),
+    (int, True, 1),
+    (int, '1', 1),
+    (int, 1, 1),
+    (int, 1.9, 1),
+    (float, False, 0.0),
+    (float, True, 1),
+    (float, '1', 1.0),
+    (float, '1.0', 1),
+    (float, 1.0, 1.0)
+])
 def test_cast_values(cls, value_in, value_out):
     t = Type(cls)
     assert t.cast(value_in) == value_out
@@ -72,22 +72,32 @@ def test_cannot_cast_float_like_strings_to_int():
     with pytest.raises(ValueError):
         assert t.cast('3.14')
 
+
 @pytest.mark.parametrize('cls, value_in, value_out', [
-        (str, False, 'False'),
-        (str, 'str', 'str'),
-        (str, 1, '1'),
-        (str, .1, '0.1'),
-        (int, False, 0),
-        (int, True, 1),
-        (int, '1', 1),
-        (int, 1, 1),
-        (int, 1.9, 1),
-        (float, False, 0.0),
-        (float, True, 1),
-        (float, '1', 1.0),
-        (float, '1.0', 1),
-        (float, 1.0, 1.0)
-    ])
-def test_cast_values(cls, value_in, value_out):
+    (str, False, 'False'),
+    (str, 'str', 'str'),
+    (str, 1, '1'),
+    (str, .1, '0.1'),
+    (int, False, '0'),
+    (int, True, '1'),
+    (int, '1', '1'),
+    (int, 1, '1'),
+    (int, 1.9, '1'),
+    (float, False, '0.0'),
+    (float, True, '1.0'),
+    (float, '1', '1.0'),
+    (float, 1.0, '1.0')
+])
+def test_value_representation(cls, value_in, value_out):
     t = Type(cls)
+    assert t.repr_value(value_in) == value_out
+
+
+@pytest.mark.parametrize('value_in, value_out', [
+    ('secret', 's****t'),
+    ('short', '*****'),
+    ('tiny', '****')
+])
+def test_value_representation(value_in, value_out):
+    t = SecretType()
     assert t.repr_value(value_in) == value_out
