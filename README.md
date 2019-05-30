@@ -31,6 +31,7 @@ Dbgr [read 'ˌdiːˈbʌɡər'] is a interactive terminal tool to test and debug 
   * [Arguments](#arguments-1)
 * [Caching](#caching)
 * [Asserts](#asserts)
+* [Tools](#tools)
 * [Autocomplete and History](#autocomplete-and-history)
 
 
@@ -360,6 +361,8 @@ async def create_item(env, session):
     assert rv.status == 201
 ```
 
+## Tools
+Module `dbgr.tool` provides function `uuid4` that gives you random uuid as a string. In the future there we will add another usefull methods.
 
 ## Autocomplete and History
 DBGR supports autocomplete for commands and requests. You need to install and setup [argcomplete](https://pypi.org/project/argcomplete/) according to documentation.
