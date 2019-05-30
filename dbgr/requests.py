@@ -60,6 +60,15 @@ class Type:
     def value_input(self, prompt):
         return input(f'{prompt}: ')
 
+    def repr_value(self, value):
+        return str(self.cast(value))
+
+    @staticmethod
+    def get_type(annotation):
+        if annotation is not None and issubclass(annotation, Type):
+            return annotation()
+        return Type(annotation)
+
 
 class SecretType(Type):
     def __init__(self):
@@ -70,6 +79,13 @@ class SecretType(Type):
 
     def __str__(self):
         return 'secret'
+
+    def repr_value(self, value):
+        value = super().repr_value(value)
+        length = len(value)
+        if length <= 5:
+            return '*' * length
+        return f'{value[0]}{"*" * (length - 2)}{value[-1]}'
 
 
 @dataclass
@@ -87,7 +103,10 @@ class Result:
             f'{colorama.Style.DIM}({type(self.value).__name__}{from_cache})'
         )
         if self.value is not None:
-            buffer += f'{colorama.Style.RESET_ALL}:\n{pformat(self.value)}'
+            buffer += (
+                f'{colorama.Style.RESET_ALL}:\n'
+                f'{pformat(self.annotation.repr_value(self.value))}'
+            )
         return buffer
 
     @property
@@ -135,9 +154,10 @@ class DefaultValueArgument(Argument):
         self.value = value
 
     def __str__(self):
+        buffer = f'{self.name} [default: {self.annotation.repr_value(self.value)}'
         if self.annotation:
-            return f'{self.name} [default: {self.value}, type: {self.annotation}]'
-        return f'{self.name} [default: {self.value}]'
+            return f'{buffer}, type: {self.annotation}]'
+        return f'{buffer}]'
 
     def get_value(self, kwargs, use_default=False):
         if self.name in kwargs:
@@ -157,7 +177,7 @@ class Request:
         self.request = request
         self.cache = cache
         self.validate_name()
-        self.annotation = Type(self.request.__annotations__.get('return'))
+        self.annotation = Type.get_type(self.request.__annotations__.get('return'))
 
     @property
     def module(self):
@@ -175,11 +195,7 @@ class Request:
         args_spec = inspect.getfullargspec(self.request)
         defaults = list(args_spec.defaults or [])
         for argument in args_spec.args[:1:-1]:
-            arg_class = args_spec.annotations.get(argument)
-            if issubclass(arg_class, Type): 
-                annotation = arg_class()
-            else:
-                annotation = Type(arg_class)
+            annotation = Type.get_type(args_spec.annotations.get(argument))
             if defaults:
                 arg = DefaultValueArgument(argument, annotation, defaults.pop())
             else:
