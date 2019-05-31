@@ -56,3 +56,8 @@ def test_prompts_for_secret_value(monkeypatch, capsys):
     monkeypatch.setattr('getpass.getpass', lambda _: 'password')
     a = DefaultValueArgument('name', SecretType(), 'default')
     assert a.get_value({}) == 'password'
+
+
+def test_mistmatched_type_of_default_value():
+    a = DefaultValueArgument('name', Type(int), 'string')
+    assert str(a) == 'name [default: string, type: int]'

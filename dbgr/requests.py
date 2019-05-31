@@ -61,7 +61,10 @@ class Type:
         return input(f'{prompt}: ')
 
     def repr_value(self, value):
-        return str(self.cast(value))
+        try:
+            return str(self.cast(value))
+        except ValueError:
+            return str(value)
 
     @staticmethod
     def get_type(annotation):
