@@ -1,10 +1,12 @@
 import random
 import pytest
 import dbgr.requests
+from tests.conftest import escape_ansi
 from dbgr.requests import (
     parse_cmd_arguments, get_requests, extract_module_name, Request, find_request,
     RequestNotImplementsError, AmbiguousRequestNameError, register_request,
-    parse_module_name, parse_request_name
+    parse_module_name, parse_request_name, load_module, load_requests,
+    execute_request, Result, Type
 )
 
 
@@ -165,3 +167,59 @@ def test_parse_module_name(name, result):
 ])
 def test_parse_request_name(name, result):
     assert parse_request_name(name) == result
+
+
+def test_load_module(monkeypatch):
+    class mocked_spec:
+        def __init__(self):
+            self.loaded = []
+            self.loader = type('', (), {})()
+            self.loader.exec_module = self.exec_module
+
+        def exec_module(self, module):
+            self.loaded.append(module)
+
+    loaded_spec = mocked_spec()
+
+    def mocked_spec_from_file(name, path):
+        assert name == 'module'
+        assert path == '/path/module.py'
+        return loaded_spec
+
+    def mocked_module_from_spec(spec):
+        assert spec == loaded_spec
+        return 'loaded_module'
+
+
+    monkeypatch.setattr(dbgr.requests.importlib.util, 'spec_from_file_location', mocked_spec_from_file)
+    monkeypatch.setattr(dbgr.requests.importlib.util, 'module_from_spec', mocked_module_from_spec)
+    load_module('/path/module.py')
+    assert loaded_spec.loaded == ['loaded_module']
+
+
+def test_load_modules(monkeypatch):
+    loaded = []
+    def mocked_load(module):
+        loaded.append(module)
+    monkeypatch.setattr(dbgr.requests.glob, 'glob', lambda _: ['/path1/module1.py', '/path2/module2.py'])
+    monkeypatch.setattr(dbgr.requests, 'load_module', mocked_load)
+    load_requests()
+    assert loaded == ['/path1/module1.py', '/path2/module2.py']
+
+
+@pytest.mark.asyncio
+async def test_execute_request(monkeypatch, capsys):
+    async def mocked_request(environment, session, use_defaults, cache, kwargs):
+        assert environment == 'environment'
+        assert session == 'session'
+        assert use_defaults == True
+        assert cache == 'cache_type'
+        assert kwargs == {'arg1': 'val1', 'arg2': 'val2'}
+        return Result('result', Type(str))
+
+    monkeypatch.setattr(dbgr.requests, 'find_request', lambda _: mocked_request)
+    assert 'result' == await execute_request(
+        'session', 'environment', 'request', True, 'cache_type', arg1='val1', arg2='val2'
+    )
+    captured = capsys.readouterr()
+    assert escape_ansi(captured.out) == "Result (str):\n'result'\n"
