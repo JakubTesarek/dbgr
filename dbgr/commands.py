@@ -60,9 +60,12 @@ async def list_command(args):
 
 
 async def environments_command(args): # pylint: disable=W0613
-    ''' List all available environments '''
+    ''' List available environments '''
     for env in get_environments():
-        print(f'- {env}')
+        if env == DEFAULT_ENVIRONMENT:
+            print(f'- {colorama.Style.BRIGHT}{env}')
+        else:
+            print(f'- {env}')
 
 
 def argument_parser():
