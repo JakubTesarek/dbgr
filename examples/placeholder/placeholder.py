@@ -2,7 +2,7 @@
 Api calls to REST testing server: http://jsonplaceholder.typicode.com
 '''
 
-from dbgr import request
+from dbgr import request, response
 
 
 @request
@@ -19,6 +19,14 @@ async def post(env, session, post_id: int=1):
 
 
 @request
+async def last_post_id(env, session) -> int:
+    ''' Retrieve id of latest post '''
+    res  = await session.get(f'{env["placeholder"]["url"]}/posts')
+    data = await res.json()
+    return data[-1]['id']
+
+
+@request
 async def delete_post(env, session, post_id: int):
     ''' Delete post by ID '''
     await session.delete(f'{env["placeholder"]["url"]}/posts/{post_id}')
@@ -28,9 +36,17 @@ async def delete_post(env, session, post_id: int):
 async def post_comments(env, session, post_id: int=1):
     ''' Retrieve comments from single post '''
     res = await session.get(
-        f'{env["placeholder"]["url"]}/comments', params={'postId': article_id}
+        f'{env["placeholder"]["url"]}/comments', params={'postId': post_id}
     )
     return await res.json()
+
+
+@request
+async def last_post_comments(session):
+    ''' Retrieve comments from latest post '''
+    session.conn_timeout = 2
+    last_post_id = await response('last_post_id')
+    return await response('post_comments', post_id=last_post_id)
 
 
 @request

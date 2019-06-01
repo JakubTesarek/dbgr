@@ -68,14 +68,29 @@ Now you can execute the request with `$ dbgr request get_example` or shorter `$ 
 
 
 ## Requests
-DBGR request is a function decorated with `@dbgr.request`. In its simplest form it accepts two arguments. First argument is the environment it was executed in. The second argument is an instance of `aiohttp.ClientSession`. You don't have to return or log anything from your request. The ClientSession does all logging automatically.
+DBGR request is a function decorated with `@dbgr.request`. In its simplest form it accepts argument `session` which is instance of `aiohttp.ClinetSession`. This function will get the content of `http://example.com`:
+
+```
+@requst
+async def get_example(session):
+    await session.get('http://example.com')
+```
+
+
+> You don't have to return or log anything from your request. The ClientSession does all logging automatically.
+
+Request also accepts optional argument `env`. If present, it will be filled with instance of [ConfigParser](https://docs.python.org/3/library/configparser.html#configparser.ConfigParser) with all your [environment variables](#environment) loaded.
+
+The order of arguments doesn't matter. But it's important that `env` and `session` are within first two arguments and they are named correctly.
+
+** It's important to use correct names of `env`, `session`. DBGR based on the names decides if it should fill them with actual environment and session or if they are [user-defined arguments](#arguments) with prompt.
 
 ### Names
 By default you execute your request with `$ dbgr r <function_name>`. Optionally you can change the name of the request with an argument:
 
 ```
 @requst(name='different_name')
-async def get_example(env, session):
+async def get_example(session):
     await session.get('http://example.com')
 ```
 
@@ -166,7 +181,7 @@ You can annotate as many arguments as you want. Arguments without annotation wil
 
 ```
 @request
-async def get_comment(env, session, comment_id: int):
+async def get_comment(session, comment_id: int):
     data = session.get('/comments', params={'id': comment_id})
 ```
 
@@ -179,7 +194,7 @@ You can also combine default values with annotation.
 
 ```
 @request
-async def get_comment(env, session, comment_id: int=1):
+async def get_comment(session, comment_id: int=1):
     data = session.get('/comments', params={'id': comment_id})
 ```
 
@@ -202,7 +217,7 @@ Requests can also prompt you for password. For that, use type `secret` from `dbg
 from dbgr import request, secret
 
 @request
-async def login(env, session, username, password: secret):
+async def login(session, username, password: secret):
     await session.post('/login', data={'username': username, 'password': password})
 ```
 
@@ -219,7 +234,7 @@ Secret type can have default value too, just like any other argument. In termina
 from dbgr import request, secret
 
 @request
-async def change_password(env, session, password: secret='SuperSecret'):
+async def change_password(session, password: secret='SuperSecret'):
     await session.post('/change_password', data={'password': password})
 ```
 
@@ -238,7 +253,7 @@ You can use type hinting with the same [limitations as with arguments](#types_an
 
 ```
 @request
-async def count_comments(env, session) -> int:
+async def count_comments(session) -> int:
     resp = session.get('/comments')
     return len(resp.json())
 ```
@@ -250,7 +265,7 @@ If your request returns [Secret Type](#secret-type), it will be obfuscated in th
 from dbgr import request, secret
 
 @request
-async def retrieve_password(env, session) -> secret:
+async def retrieve_password(session) -> secret:
     res = await session.get('/get_password')
     return await res.text()
 ```
@@ -270,21 +285,21 @@ You can change the environment that will be used with `-e`/`--env` switch. DBGR 
 
 
 ## Recursive calls
-Sometimes you might need to make a different request before executing what you really want to do. For example to download user data, you need to login first. You can do that by using coroutine `dbgr.response`. It accepts at least 3 arguments - name of the request to execute as a string (you can specify module the same as in terminal), environment and session.
+Sometimes you might need to make a different request before executing what you really want to do. For example to download user data, you need to login first. You can do that by using coroutine `dbgr.response`.
 
-> In most cases you'll call another requests with the session and environment your function received. But you can also modify them before calling `response`.
+It has one required argument - name of the request to execute as a string (you can specify module the same as in terminal).
 
 ```
 from dbgr import request, response
 
 @request
-async def login(env, session):
+async def login(session):
     rv = session.post('/login', data={'username': env['login']})
     return await rv.json()
 
 @request
-async def get_comments(env, session):
-    auth = response('login', env, session)
+async def get_comments(session):
+    auth = response('login')
     data = session.get('/comments', headers={'Authorization': f'Bearer {auth["token"}'})
 ```
 
@@ -296,13 +311,13 @@ As with the terminal execution, you can provide arguments for recursive calls. S
 
 ```
 @request
-async def login(env, session, username):
+async def login(session, username):
     rv = session.post('/login', data={'username': username})
     return await rv.json()
 
 @request
-async def get_comments(env, session):
-    auth = response('login', env, session, username='admin@example.com')
+async def get_comments(session):
+    auth = response('login', username='admin@example.com')
     data = session.get('/comments', headers={'Authorization': f'Bearer {auth["token"}'})
 ```
 
@@ -310,17 +325,27 @@ You can also specify you want to use default values wherever possible with `use_
 
 ```
 @request
-async def list_comments(env, session, page=1):
+async def list_comments(session, page=1):
     rv = session.get('/comments', params={page: page})
     return await rv.json()
 
 @request
-async def export_comments(env, session):
-    auth = response('list_comments', env, session, use_defaults=True)
+async def export_comments(session):
+    comments = response('list_comments', use_defaults=True)
+    ...
 ```
 
 > Order of precedence is the same as in terminal execution. You will still get promted for arguments which don't have any value.
 
+Optionally you can call `response` with arguments `env` and `session` (in that order or as kwargs). In most cases you'll probably not need it but it allows you to modify the behaviour of session or variables in environments:
+
+```
+@request
+async def get_comments(session):
+    session.conn_timeout = 5
+    auth = response('login', session=session)
+    ...
+```
 
 ## Caching
 You can mark request to be cached. All subsequent calls of the same request will be suspended and the result will be taken from cache. This is useful for example when you work with API that requires sign-in. You usually want to call the authentication endpoint only once at the beginning and then just re-use cached value.
@@ -356,7 +381,7 @@ DBGR supports assertions in requests. If an assert fails, it will get reported t
 
 ```
 @request
-async def create_item(env, session):
+async def create_item(session):
     rv = session.post('/comments', data={...})
     assert rv.status == 201
 ```

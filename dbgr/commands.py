@@ -4,8 +4,8 @@ import traceback
 import textwrap
 import colorama
 from dbgr.requests import get_requests, execute_request, parse_cmd_arguments, parse_module_name
-from dbgr.environment import Environment, get_environments
-from dbgr.session import get_session
+from dbgr.environment import init_environment, get_environments, DEFAULT_ENVIRONMENT
+from dbgr.session import close_session
 from dbgr.completion import RequestsCompleter, ModulesCompleter, EnvironmentsCompleter
 
 
@@ -17,11 +17,9 @@ def version_command():
 
 async def prepare_and_execute_request(request, args):
     try:
-        session = get_session()
-        environment = Environment(args.env)
+        init_environment(args.env)
         arguments = parse_cmd_arguments(args.arguments)
-        await execute_request(
-            session, environment, request, use_defaults=args.use_defaults, **arguments)
+        await execute_request(request, use_defaults=args.use_defaults, **arguments)
     except AssertionError:
         _, _, trace = sys.exc_info()
         trace_info = traceback.extract_tb(trace)
@@ -31,7 +29,7 @@ async def prepare_and_execute_request(request, args):
     except Exception as ex:
         print(f'{colorama.Fore.RED}{ex}')
     finally:
-        await session.close()
+        await close_session()
 
 
 async def interactive_command(args):
@@ -84,8 +82,8 @@ def argument_parser():
         help=interactive_command.__doc__
     )
     int_parser.add_argument(
-        '-e', '--env', default='default',
-        help='Environment that will be used (default: "default")'
+        '-e', '--env', default=DEFAULT_ENVIRONMENT,
+        help=f'Environment that will be used (default: "{DEFAULT_ENVIRONMENT}")'
     ).completer = EnvironmentsCompleter()
     int_parser.add_argument(
         '-d', '--use-defaults', action='store_true',
@@ -102,7 +100,7 @@ def argument_parser():
         help='Name of the request to execute'
     ).completer = RequestsCompleter()
     req_parser.add_argument(
-        '-e', '--env', default='default',
+        '-e', '--env', default=DEFAULT_ENVIRONMENT,
         help='Environment that will be used'
     ).completer = EnvironmentsCompleter()
     req_parser.add_argument(

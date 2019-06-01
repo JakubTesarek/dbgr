@@ -90,37 +90,69 @@ def test_get_extra_arguments():
     assert arg_4.annotation.cls == str
 
 
-def test_resolve_arguments_passed():
+def test_resolve_arguments_passed_with_env_session():
     async def func(env, session, arg_1):
         pass
 
-    args = Request(func).resolve_arguments(False, {'arg_1': 123})
+    args = Request(func).resolve_arguments('env', 'session', False, {'arg_1': 123})
+    assert args == {'arg_1': 123, 'env': 'env', 'session': 'session'}
+
+
+def test_resolve_arguments_passed_with_env():
+    async def func(env, arg_1):
+        pass
+
+    args = Request(func).resolve_arguments('env', 'session', False, {'arg_1': 123})
+    assert args == {'arg_1': 123, 'env': 'env'}
+
+
+def test_resolve_arguments_passed_with_session():
+    async def func(session, arg_1):
+        pass
+
+    args = Request(func).resolve_arguments('env', 'session', False, {'arg_1': 123})
+    assert args == {'arg_1': 123, 'session': 'session'}
+
+
+def test_resolve_arguments_passed():
+    async def func(arg_1):
+        pass
+
+    args = Request(func).resolve_arguments('env', 'session', False, {'arg_1': 123})
     assert args == {'arg_1': 123}
 
 
-def test_resolve_arguments_use_default():
-    async def func(env, session, arg_1='default'):
+def test_resolve_arguments_empty():
+    async def func():
         pass
 
-    args = Request(func).resolve_arguments(True, {})
+    args = Request(func).resolve_arguments('env', 'session', False, {'arg_1': 123})
+    assert args == {}
+
+
+def test_resolve_arguments_use_default():
+    async def func(arg_1='default'):
+        pass
+
+    args = Request(func).resolve_arguments('env', 'session', True, {})
     assert args == {'arg_1': 'default'}
 
 
 def test_resolve_arguments_defaults_dont_overwrite_passed():
-    async def func(env, session, arg_1='default'):
+    async def func(arg_1='default'):
         pass
 
-    args = Request(func).resolve_arguments(True, {'arg_1': 'passed'})
+    args = Request(func).resolve_arguments('env', 'session', True, {'arg_1': 'passed'})
     assert args == {'arg_1': 'passed'}
 
 
 def test_prompts_for_missing_values(monkeypatch):
     monkeypatch.setattr(NoDefaultValueArgument, 'get_value', lambda *_, **__: 'input')
-    async def func(env, session, arg_1):
+    async def func(arg_1):
         pass
 
     req = Request(func)
-    args = req.resolve_arguments(False, {})
+    args = req.resolve_arguments('env', 'session', False, {})
     assert args == {'arg_1': 'input'}
 
 

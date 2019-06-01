@@ -1,11 +1,14 @@
 import getpass
 import inspect
 import os
+import functools
 import importlib.util
 import glob
 from dataclasses import dataclass
 from pprint import pformat
 import colorama
+from dbgr.environment import get_environment
+from dbgr.session import get_session
 
 
 _REQUESTS = None
@@ -175,6 +178,9 @@ class DefaultValueArgument(Argument):
 
 
 class Request:
+    env_arg = 'env'
+    session_arg = 'session'
+
     def __init__(self, request, name=None, cache=None):
         self.name = name if name is not None else request.__name__
         self.request = request
@@ -196,8 +202,13 @@ class Request:
     def extra_arguments(self):
         extras = []
         args_spec = inspect.getfullargspec(self.request)
+        args = args_spec.args
+        if self.env_arg in args:
+            args.remove(self.env_arg)
+        if self.session_arg in args:
+            args.remove(self.session_arg)
         defaults = list(args_spec.defaults or [])
-        for argument in args_spec.args[:1:-1]:
+        for argument in args[::-1]:
             annotation = Type.get_type(args_spec.annotations.get(argument))
             if defaults:
                 arg = DefaultValueArgument(argument, annotation, defaults.pop())
@@ -206,25 +217,46 @@ class Request:
             extras.append(arg)
         return extras[::-1]
 
-    def resolve_arguments(self, use_defaults, kwargs):
+    @property
+    def requires_env(self):
+        args_spec = inspect.getfullargspec(self.request)
+        return self.env_arg in args_spec.args[:2]
+
+    @property
+    def requires_session(self):
+        args_spec = inspect.getfullargspec(self.request)
+        return self.session_arg in args_spec.args[:2]
+
+    def resolve_arguments(self, env, session, use_defaults, kwargs):
         arguments = {}
         for argument in self.extra_arguments:
             arguments[argument.name] = argument.get_value(
                 kwargs, use_default=use_defaults
             )
+        if self.requires_env:
+            arguments[self.env_arg] = env
+        if self.requires_session:
+            arguments[self.session_arg] = session
         return arguments
+
+    def cache_key(self, arguments):
+        key = set((self.name, self.module))
+        for name, value in arguments.items():
+            if name not in (self.env_arg, self.session_arg):
+                key.add((name, value))
+        return frozenset(key)
 
     async def __call__(self, env, session, use_defaults=False, cache=True, kwargs=None): # pylint: disable=R0913
         kwargs = {} if kwargs is None else kwargs
-        arguments = self.resolve_arguments(use_defaults, kwargs)
+        arguments = self.resolve_arguments(env, session, use_defaults, kwargs)
         if self.cache:
             cached = True
-            key = (self.name, self.module, frozenset(arguments.items()))
+            key = self.cache_key(arguments)
             if key not in _CACHE or not cache:
                 cached = False
-                _CACHE[key] = await self.request(env, session, **arguments)
+                _CACHE[key] = await self.request(**arguments)
             return Result(_CACHE[key], self.annotation, cached)
-        value = await self.request(env, session, **arguments)
+        value = await self.request(**arguments)
         return Result(value, self.annotation)
 
     def validate_name(self):
@@ -274,10 +306,12 @@ def parse_cmd_arguments(args):
 
 
 async def execute_request(
-        session, environment, request, use_defaults=False, cache=True, **kwargs):
+        request, env=None, session=None, use_defaults=False, cache=True, **kwargs):
+    env = env if env is not None else get_environment()
+    session = session if session is not None else get_session()
     request = find_request(request)
     result = await request(
-        environment, session, use_defaults=use_defaults, cache=cache, kwargs=kwargs)
+        env, session, use_defaults=use_defaults, cache=cache, kwargs=kwargs)
     print(result)
     return result.value
 
@@ -343,3 +377,17 @@ def parse_request_name(request):
     if request and ':' in request:
         module, request = request.split(':', 1)
     return None if module == '' else module, None if request == '' else request
+
+
+def request_decorator(name=None, cache=None):
+    func = name
+    if callable(func):
+        request = Request(func)
+        register_request(request)
+        return request
+    @functools.wraps(func)
+    def decorator(func):
+        request = Request(func, name, cache)
+        register_request(request)
+        return request
+    return decorator

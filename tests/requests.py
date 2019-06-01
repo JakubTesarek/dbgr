@@ -219,7 +219,7 @@ async def test_execute_request(monkeypatch, capsys):
 
     monkeypatch.setattr(dbgr.requests, 'find_request', lambda _: mocked_request)
     assert 'result' == await execute_request(
-        'session', 'environment', 'request', True, 'cache_type', arg1='val1', arg2='val2'
+        'request', 'environment', 'session', True, 'cache_type', arg1='val1', arg2='val2'
     )
     captured = capsys.readouterr()
     assert escape_ansi(captured.out) == "Result (str):\n'result'\n"
