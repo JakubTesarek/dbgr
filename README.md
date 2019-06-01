@@ -283,6 +283,7 @@ Environments offer you different way to specify variables for your requests. You
 
 You can change the environment that will be used with `-e`/`--env` switch. DBGR searched for environments in current working directory in .ini files. Name of the environment is the name of the file without suffix.
 
+You can list all awailable environments with `dbgr envs`/`dbgr e`. With optional argument (`dbgr e <name_of_environment>`) it will list all variables defined in that environment.
 
 ## Recursive calls
 Sometimes you might need to make a different request before executing what you really want to do. For example to download user data, you need to login first. You can do that by using coroutine `dbgr.response`.

@@ -4,7 +4,7 @@ import traceback
 import textwrap
 import colorama
 from dbgr.requests import get_requests, execute_request, parse_cmd_arguments, parse_module_name
-from dbgr.environment import init_environment, get_environments, DEFAULT_ENVIRONMENT
+from dbgr.environment import init_environment, get_environments, DEFAULT_ENVIRONMENT, Environment
 from dbgr.session import close_session
 from dbgr.completion import RequestsCompleter, ModulesCompleter, EnvironmentsCompleter
 
@@ -60,12 +60,22 @@ async def list_command(args):
 
 
 async def environments_command(args): # pylint: disable=W0613
-    ''' List available environments '''
-    for env in get_environments():
-        if env == DEFAULT_ENVIRONMENT:
-            print(f'- {colorama.Style.BRIGHT}{env}')
-        else:
-            print(f'- {env}')
+    '''
+        List available environments. With optional <environment> argument
+        lists all defined variables and values
+    '''
+    if args.environment:
+        env = Environment(args.environment)
+        for section in env.sections():
+            print(f'{colorama.Style.BRIGHT}{section}')
+            for key, value in env.items(section):
+                print(f'- {key}: {value}')
+    else:
+        for env in get_environments():
+            if env == DEFAULT_ENVIRONMENT:
+                print(f'- {colorama.Style.BRIGHT}{env}')
+            else:
+                print(f'- {env}')
 
 
 def argument_parser():
@@ -132,5 +142,10 @@ def argument_parser():
         'list-environments',
         aliases=['envs', 'e'],
         help=environments_command.__doc__)
+    environments_parser.add_argument(
+        'environment',
+        nargs='?',
+        help='Name of environment to list'
+    ).completer = EnvironmentsCompleter()
     environments_parser.set_defaults(func=environments_command)
     return parser
