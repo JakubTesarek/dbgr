@@ -6,7 +6,7 @@ from dbgr.requests import (
     parse_cmd_arguments, get_requests, extract_module_name, Request, find_request,
     RequestNotImplementsError, AmbiguousRequestNameError, register_request,
     parse_module_name, parse_request_name, load_module, load_requests,
-    execute_request
+    execute_request, request_decorator
 )
 from dbgr.types import Type
 from dbgr.results import Result
@@ -507,6 +507,16 @@ async def test_cached_request_first_call_not_cached(mocked_env, mocked_session):
     assert res.value == 'value'
     assert res.cached == False
 
+@pytest.mark.asyncio
+async def test_cached_request_first_call_not_cached_with_env(mocked_env, mocked_session):
+    async def func(env):
+        return 'value'
+
+    req = Request(func, cache='session')
+    res = await req(mocked_env, mocked_session)
+    assert res.value == 'value'
+    assert res.cached == False
+
 
 @pytest.mark.asyncio
 async def test_cached_request_second_call_cached(mocked_env, mocked_session):
@@ -536,3 +546,47 @@ async def test_argument_is_part_of_cache_key(mocked_env, mocked_session):
     res_2 = await req(mocked_env, mocked_session, kwargs={'arg': 2})
     assert res_2.value == 2
     assert res_2.cached == False
+
+
+def test_request_decorator_no_params():
+    async def req_function():
+        pass
+
+    req = request_decorator(req_function)
+    assert isinstance(req, Request)
+    assert req.request == req_function
+    assert req.cache == None
+    assert req.name == 'req_function'
+
+
+def test_request_decorator_with_cache():
+    async def req_function():
+        pass
+
+    req = request_decorator(cache='session')(req_function)
+    assert isinstance(req, Request)
+    assert req.request == req_function
+    assert req.cache == 'session'
+    assert req.name == 'req_function'
+
+
+def test_request_decorator_with_name():
+    async def req_function():
+        pass
+
+    req = request_decorator(name='alternative_name')(req_function)
+    assert isinstance(req, Request)
+    assert req.request == req_function
+    assert req.cache == None
+    assert req.name == 'alternative_name'
+
+
+def test_request_decorator_with_name_and_cache():
+    async def req_function():
+        pass
+
+    req = request_decorator(cache='session', name='alternative_name')(req_function)
+    assert isinstance(req, Request)
+    assert req.request == req_function
+    assert req.cache == 'session'
+    assert req.name == 'alternative_name'
