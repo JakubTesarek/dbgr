@@ -6,13 +6,46 @@ def escape_ansi(string):
     return re.sub(r'\x1b[^m]*m', '', str(string))
 
 
-@pytest.fixture
-def session():
-    return object()
+def mock_request(name='request', module='module', result=None):
+    async def test_request():
+        return result
+    if module:
+        test_request.__module__ = module
+    return dbgr.requests.Request(test_request, name=name)
+
+
+def mock_request(name='request', module='module', result=None):
+    async def test_request():
+        return result
+    if module:
+        test_request.__module__ = module
+    return dbgr.requests.Request(test_request, name=name)
 
 
 @pytest.fixture
-def env():
+def mocked_request(name='request', module='module', result=None):
+    async def test_request():
+        return result
+    if module:
+        test_request.__module__ = module
+    return dbgr.requests.Request(test_request, name=name)
+
+
+class MockedAiohttpSession:
+    def close(self):
+        pass
+
+    def __del__(self):
+        pass
+
+
+@pytest.fixture
+def mocked_session():
+    return MockedAiohttpSession()
+
+
+@pytest.fixture
+def mocked_env():
     return {}
 
 

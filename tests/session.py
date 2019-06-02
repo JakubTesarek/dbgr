@@ -1,6 +1,10 @@
+import pytest
 import aiohttp
 from dbgr import session
 
 
-def test_get_session():
-    assert isinstance(session.get_session(), aiohttp.ClientSession)
+@pytest.mark.asyncio
+async def test_get_session():
+    sess = session.get_session()
+    assert isinstance(sess, aiohttp.ClientSession)
+    await sess.close()

@@ -1,14 +1,14 @@
-import getpass
 import inspect
 import os
 import functools
 import importlib.util
 import glob
-from dataclasses import dataclass
-from pprint import pformat
 import colorama
 from dbgr.environment import get_environment
 from dbgr.session import get_session
+from dbgr.types import Type
+from dbgr.arguments import DefaultValueArgument, NoDefaultValueArgument
+from dbgr.results import Result
 
 
 _REQUESTS = None
@@ -33,148 +33,6 @@ class InvalidRequestNameError(ValueError):
 
 class DuplicateRequestNameError(ValueError):
     pass
-
-
-class Type:
-    supported_types = ['bool', 'str', 'int', 'float']
-
-    def __init__(self, cls):
-        self.cls = None
-        if cls and cls.__name__ in self.supported_types:
-            self.cls = cls
-
-    def cast(self, value):
-        if value is not None and self:
-            if self.cls == bool:
-                if isinstance(value, str):
-                    value = value.lower()
-                return value not in [0, 0.0, '0', False, 'f', 'false', 'n', 'no']
-            return self.cls(value)
-        return value
-
-    def __str__(self):
-        if self:
-            return self.cls.__name__
-        return ''
-
-    def __bool__(self):
-        return self.cls is not None
-
-    def value_input(self, prompt):
-        return input(f'{prompt}: ')
-
-    def repr_value(self, value):
-        try:
-            return str(self.cast(value))
-        except ValueError:
-            return str(value)
-
-    @staticmethod
-    def get_type(annotation):
-        if annotation is not None and issubclass(annotation, Type):
-            return annotation()
-        return Type(annotation)
-
-
-class SecretType(Type):
-    def __init__(self):
-        super().__init__(str)
-
-    def value_input(self, prompt):
-        return getpass.getpass(f'{prompt}: ')
-
-    def __str__(self):
-        return 'secret'
-
-    def repr_value(self, value):
-        value = super().repr_value(value)
-        length = len(value)
-        if length <= 5:
-            return '*' * length
-        return f'{value[0]}{"*" * (length - 2)}{value[-1]}'
-
-
-@dataclass
-class Result:
-    _value: object
-    annotation: Type
-    cached: bool = False
-
-    def __str__(self):
-        from_cache = ''
-        if self.cached:
-            from_cache = ', from cache'
-        buffer = (
-            f'{colorama.Style.BRIGHT}Result{colorama.Style.RESET_ALL} '
-            f'{colorama.Style.DIM}({type(self.value).__name__}{from_cache})'
-        )
-        if self.value is not None:
-            buffer += (
-                f'{colorama.Style.RESET_ALL}:\n'
-                f'{pformat(self.annotation.repr_value(self.value))}'
-            )
-        return buffer
-
-    @property
-    def value(self):
-        return self.annotation.cast(self._value)
-
-
-class Argument:
-    def __init__(self, name, annotation):
-        self.name = name
-        self.annotation = annotation
-
-    def __str__(self):
-        if self.annotation:
-            return f'{self.name} [type: {self.annotation}]'
-        return self.name
-
-    def cast(self, value):
-        try:
-            return self.annotation.cast(value)
-        except:
-            print(f'{colorama.Fore.RED}String "{value}" cannot be converted to {self.annotation}')
-            raise
-
-    def value_input(self, nullable=False):
-        value = self.annotation.value_input(self)
-        if nullable and value == '':
-            return None
-        try:
-            return self.cast(value)
-        except ValueError:
-            return self.value_input(nullable)
-
-
-class NoDefaultValueArgument(Argument):
-    def get_value(self, kwargs, use_default=None): # pylint: disable=W0613
-        if self.name in kwargs:
-            return self.cast(kwargs[self.name])
-        return self.value_input()
-
-
-class DefaultValueArgument(Argument):
-    def __init__(self, name, annotation, value):
-        super().__init__(name, annotation)
-        self.value = value
-
-    def __str__(self):
-        buffer = f'{self.name} [default: {self.annotation.repr_value(self.value)}'
-        if self.annotation:
-            return f'{buffer}, type: {self.annotation}]'
-        return f'{buffer}]'
-
-    def get_value(self, kwargs, use_default=False):
-        if self.name in kwargs:
-            value = self.cast(kwargs[self.name])
-        elif use_default:
-            value = self.value
-        else:
-            value = self.value_input(nullable=True)
-            if value is None:
-                value = self.value
-        return value
 
 
 class Request:

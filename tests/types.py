@@ -1,5 +1,6 @@
 import pytest
-from dbgr.requests import Type, SecretType
+from dbgr.types import Type, SecretType
+
 
 @pytest.mark.parametrize('cls', [bool, str, int, float])
 def test_create_supported_type(cls):

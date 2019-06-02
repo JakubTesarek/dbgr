@@ -1,5 +1,2 @@
-from dbgr.requests import (
-    request_decorator as request,
-    execute_request as response,
-    SecretType as secret
-)
+from dbgr.requests import request_decorator as request, execute_request as response
+from dbgr.types import SecretType as secret
