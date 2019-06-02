@@ -15,7 +15,7 @@ class Completer:
         raise NotImplementedError(f'"{__name__}" needs to be implemented in subclass')
 
 
-class EnvironmentsCompleter:
+class EnvironmentsCompleter(Completer):
     def get_choices(self):
         return tuple(get_environments())
 
