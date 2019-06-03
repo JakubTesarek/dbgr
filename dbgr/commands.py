@@ -28,21 +28,25 @@ async def prepare_and_execute_request(request, args):
         print(f'{colorama.Fore.RED}{text}')
     except Exception as ex:
         print(f'{colorama.Fore.RED}{ex}')
-    finally:
-        await close_session()
 
 
 async def interactive_command(args):
     ''' Run requests in interactive mode '''
     print(f'{colorama.Style.DIM}Dbgr interactive mode; press ^C to exit.')
-    while True:
-        request = input('> ')
-        await prepare_and_execute_request(request, args)
+    try:
+        while True:
+            request = input('> ')
+            await prepare_and_execute_request(request, args)
+    finally:
+        await close_session()
 
 
 async def request_command(args):
     ''' Execute request '''
-    await prepare_and_execute_request(args.request, args)
+    try:
+        await prepare_and_execute_request(args.request, args)
+    finally:
+        await close_session()
 
 
 async def list_command(args):
