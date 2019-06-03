@@ -1,8 +1,10 @@
 import pytest
 from argparse import Namespace
+from dbgr import meta
+from tests.conftest import escape_ansi
 from dbgr.commands import (
     argument_parser, interactive_command, request_command, list_command,
-    environments_command
+    environments_command, version_command
 )
 
 
@@ -140,3 +142,10 @@ def test_environments_command(args):
     res = argument_parser().parse_args(args)
     assert isinstance(res, Namespace)
     assert res.func == environments_command
+
+
+def test_version_command(capsys):
+    version_command()
+    captured = capsys.readouterr()
+    assert escape_ansi(captured.out) == f'{meta.__version__}\n'
+
