@@ -24,6 +24,7 @@ Dbgr [read 'ˌdiːˈbʌɡər'] is a interactive terminal tool to test and debug 
   * [Types annotations](#types-annotations)
     * [Boolean type](#boolean-type)
     * [Secret type](#secret-type)
+    * [Calendar types](#calendar-types)
 * [Return value](#return-value)
   * [Secret return value](#secret-return-value)
 * [Environment](#environment)
@@ -241,6 +242,26 @@ async def change_password(session, password: secret='SuperSecret'):
 ```
 $ dbgr r change_password
 password [default: S*********t, type: secret]:
+```
+
+#### Calendar Types
+You can specify a parameter to also be one of `datetime.datetime`, `datetime.date` or `datetime.time`.
+
+DBGR internally uses [DateParser](https://pypi.org/project/dateparser/) which allows you to use plenty of different formats and human-readable strings.
+
+
+```
+from datetime import datetime
+from dbgr import request
+
+@request
+async def punch_card(session, start: datetime):
+    ...
+```
+
+```
+$ dbgr r punch_card
+start [type: datetime]: now # will pass current date and time
 ```
 
 

@@ -8,7 +8,7 @@ from dbgr.requests import (
     parse_module_name, parse_request_name, load_module, load_requests,
     execute_request, request_decorator
 )
-from dbgr.types import Type
+from dbgr.types import Type, PrimitiveType
 from dbgr.results import Result
 from dbgr.arguments import DefaultValueArgument, NoDefaultValueArgument
 from tests.conftest import mock_request
@@ -209,7 +209,7 @@ async def test_execute_request(monkeypatch, capsys, mocked_session, mocked_env):
         assert use_defaults == True
         assert cache == 'session'
         assert kwargs == {'arg1': 'val1', 'arg2': 'val2'}
-        return Result('result', Type(str))
+        return Result('result', PrimitiveType(str))
 
     monkeypatch.setattr(dbgr.requests, 'find_request', lambda _: mocked_Request)
     assert 'result' == await execute_request(
@@ -281,27 +281,24 @@ def test_get_extra_arguments():
     arg_1 = extras[0]
     assert isinstance(arg_1, NoDefaultValueArgument)
     assert arg_1.name == 'arg_1'
-    assert isinstance(arg_1.annotation, dbgr.requests.Type)
-    assert arg_1.annotation.cls == None
+    assert isinstance(arg_1.annotation, Type)
 
     arg_2 = extras[1]
     assert isinstance(arg_2, NoDefaultValueArgument)
     assert arg_2.name == 'arg_2'
-    assert isinstance(arg_2.annotation, dbgr.requests.Type)
-    assert arg_2.annotation.cls == int
+    assert isinstance(arg_2.annotation, PrimitiveType)
 
     arg_3 = extras[2]
     assert isinstance(arg_3, DefaultValueArgument)
     assert arg_3.name == 'arg_3'
     assert arg_3.value == 'def3'
-    assert isinstance(arg_3.annotation, dbgr.requests.Type)
-    assert arg_3.annotation.cls == None
+    assert isinstance(arg_3.annotation, Type)
 
     arg_4 = extras[3]
     assert isinstance(arg_4, DefaultValueArgument)
     assert arg_4.name == 'arg_4'
     assert arg_4.value == 'def4'
-    assert isinstance(arg_4.annotation, dbgr.requests.Type)
+    assert isinstance(arg_4.annotation, Type)
     assert arg_4.annotation.cls == str
 
 

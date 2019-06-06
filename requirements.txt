@@ -2,3 +2,4 @@ aiohttp
 colorama
 argcomplete
 pygments
+dateparser
