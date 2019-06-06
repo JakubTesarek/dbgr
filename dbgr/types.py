@@ -1,6 +1,6 @@
 import getpass
-import dateparser
 from datetime import datetime, time, date
+import dateparser
 
 
 class Type:
@@ -24,20 +24,21 @@ class Type:
 
     @staticmethod
     def get_type(annotation):
+        type_object = Type()
         if annotation is not None:
             if issubclass(annotation, Type):
-                return annotation()
+                type_object = annotation()
             if annotation == bool:
-                return BooleanType()
+                type_object = BooleanType()
             if annotation == datetime:
-                return DatetimeType()
+                type_object = DatetimeType()
             if annotation == time:
-                return TimeType()
+                type_object = TimeType()
             if annotation == date:
-                return DateType()
+                type_object = DateType()
             if annotation in PrimitiveType.supported_types:
-                return PrimitiveType(annotation)
-        return Type()
+                type_object = PrimitiveType(annotation)
+        return type_object
 
 
 class BooleanType(Type):
@@ -64,8 +65,7 @@ class PrimitiveType(Type):
         self.cls = cls
 
     def cast(self, value):
-        if value is not None:
-            return self.cls(value)
+        return self.cls(value) if value is not None else None
 
     def __str__(self):
         return self.cls.__name__
@@ -97,9 +97,7 @@ class SecretType(PrimitiveType):
 
 class DatetimeType(Type):
     def cast(self, value):
-        if isinstance(value, datetime):
-            return value
-        if value is not None:
+        if value is not None and not isinstance(value, datetime):
             if isinstance(value, time):
                 value = datetime.combine(datetime.today(), value)
             if isinstance(value, date):
@@ -108,7 +106,7 @@ class DatetimeType(Type):
                 value = dateparser.parse(value)
             if not value:
                 raise ValueError(f'{type(value)} "{value}" cannot be converted to {self}')
-            return value
+        return value
 
     def __str__(self):
         return 'datetime'
@@ -127,7 +125,8 @@ class DateType(DatetimeType):
     def cast(self, value):
         value = super().cast(value)
         if value is not None:
-            return value.date()
+            value = value.date()
+        return value
 
     def __str__(self):
         return 'date'
@@ -137,7 +136,8 @@ class TimeType(DatetimeType):
     def cast(self, value):
         value = super().cast(value)
         if value is not None:
-            return value.time()
+            value = value.time()
+        return value
 
     def __str__(self):
         return 'time'
