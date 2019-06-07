@@ -67,7 +67,7 @@ class Reporter():
     async def print_response(self, response):
         print(f'{Style.DIM}<')
         print(
-            f'{Style.DIM}<{Style.RESET_ALL} {Style.BRIGHT}Content{Style.RESET_ALL}'
+            f'{Style.DIM}<{Style.RESET_ALL} {Style.BRIGHT}Content{Style.RESET_ALL} '
             f'{Style.DIM}({response.headers["Content-Type"]}){Style.RESET_ALL}:'
         )
         if 'application/json' in response.headers['Content-Type']:

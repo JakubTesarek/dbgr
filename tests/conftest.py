@@ -3,6 +3,12 @@ from io import StringIO
 import re
 import pytest
 import dbgr.requests
+from dataclasses import dataclass
+import http.client
+import aiohttp
+from multidict import CIMultiDict
+import pytest
+import json
 
 
 def escape_ansi(string):
@@ -87,3 +93,30 @@ def clear_session():
 @pytest.fixture(autouse=True)
 def mock_registered_requests(monkeypatch):
     monkeypatch.setattr(dbgr.requests, 'get_requests', lambda: {})
+
+
+class MockedResponse:
+    def __init__(self, url='', method='GET', status=200, headers=None, data=None):
+        self.url = url
+        self.method = method
+        self.headers = CIMultiDict(headers if headers else {})
+        self.status = status
+        self.data = data
+
+    @property
+    def reason(self):
+        return http.client.responses[self.status]
+
+    async def text(self):
+        return '' if self.data is None else self.data
+
+    async def json(self):
+        content_type = self.headers.get('Content-Type', '')
+        if 'application/json' not in content_type:
+            raise aiohttp.ContentTypeError()
+        return json.loads(self.data)
+
+
+@dataclass
+class Params:
+    response: MockedResponse
