@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## [1.0.6] - 2019-06-07
 ### Added
 - Added support for calendar types `datetime.datetime`, `datetime.time`, `datetime.date`.
 - Added `CHANGELOG.md`.
