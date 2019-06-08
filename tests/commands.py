@@ -300,3 +300,14 @@ async def test_list_command_request(monkeypatch, capsys):
 module2:
  - req1
 '''
+
+
+
+@pytest.mark.asyncio
+async def test_request_command(monkeypatch):
+    async def mocked_prepare_execute(req, args):
+        mocked_prepare_execute.called = True
+
+    monkeypatch.setattr(commands, 'prepare_and_execute_request', mocked_prepare_execute)
+    await request_command(attrdict({'request': 'req1'}))
+    assert mocked_prepare_execute.called
