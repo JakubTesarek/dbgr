@@ -12,13 +12,20 @@ from colorama import Style, Fore
 class ProgressBar():
     def __init__(self):
         self.message = ''
+        self.running = False
 
     def start(self):
+        self.running = True
         asyncio.ensure_future(self.render())
+
+    def stop(self):
+        self.running = False
 
     async def render(self):
         start = datetime.now()
-        for symbol in cycle(['\\', '-', '/', '|']):
+        for symbol in cycle(['\\', '-', '/', '|']):# pragma: no cover
+            if not self.running:
+                return
             elapsed = datetime.now() - start
             print(f'{self.message} {symbol} [{elapsed}]', end='\r')
             await asyncio.sleep(0.1)
@@ -32,6 +39,7 @@ class ProgressBar():
 
     async def on_request_end(self, session, trace_ctx, params): # pylint: disable=W0613
         print('', end='\r')
+        self.stop()
 
     def get_tracer(self):
         tracer = aiohttp.TraceConfig()

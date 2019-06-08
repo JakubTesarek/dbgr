@@ -118,5 +118,6 @@ class MockedResponse:
 
 
 @dataclass
-class Params:
+class AiohttpParams:
     response: MockedResponse
+    url: str = ''
