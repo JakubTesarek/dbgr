@@ -6,7 +6,7 @@ install:
   - pip install -r requirements.txt -r requirements-dev.txt
   - pip install .
 script:
-  - py.test tests/* --cov dbgr --cov-config .coveragerc
+  - make test
   - make lint
 after_success:
   - codecov
