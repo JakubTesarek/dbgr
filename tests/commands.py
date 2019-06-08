@@ -1,7 +1,8 @@
 import pytest
 from argparse import Namespace
 from dbgr import meta
-from tests.conftest import escape_ansi
+from tests.conftest import escape_ansi, attrdict, mock_request
+from dbgr import commands
 from dbgr.commands import (
     argument_parser, interactive_command, request_command, list_command,
     environments_command, version_command
@@ -149,3 +150,153 @@ def test_version_command(capsys):
     captured = capsys.readouterr()
     assert escape_ansi(captured.out) == f'{meta.__version__}\n'
 
+
+@pytest.mark.asyncio
+async def test_environments_command_list_environments(capsys, monkeypatch):
+    monkeypatch.setattr(commands, 'get_environments', lambda: ['default', 'another'])
+    await environments_command(attrdict({'environment': None}))
+    captured = capsys.readouterr()
+    assert escape_ansi(captured.out) == '- default\n- another\n'
+
+
+@pytest.mark.asyncio
+async def test_environments_command_list_environment_variables(capsys, monkeypatch):
+    class MockedEnvironment:
+        def __init__(self, env):
+            self.data = {
+                'section1': [
+                    ('attr1', 'value1'),
+                    ('attr2', 'value2')
+                ],
+                'section2': [
+                    ('attr1', 'value1')
+                ]
+            }
+
+        def items(self, section):
+            return self.data[section]
+
+        def sections(self):
+            return self.data.keys()
+
+
+    monkeypatch.setattr(commands, 'Environment', MockedEnvironment)
+    await environments_command(attrdict({'environment': 'default'}))
+    captured = capsys.readouterr()
+    assert escape_ansi(captured.out) == '''section1
+- attr1: value1
+- attr2: value2
+section2
+- attr1: value1
+'''
+
+
+@pytest.mark.asyncio
+async def test_interactive_command(capsys, monkeypatch):
+    async def mocked_prepare_execute(req, arg):
+        print(req)
+
+    inputs = ['req1', 'req2', '\x03']
+    def mocked_input(prompt):
+        i = inputs.pop(0)
+        if i == '\x03':
+            raise SystemExit()
+        return i
+
+    monkeypatch.setattr('builtins.input', mocked_input)
+    monkeypatch.setattr(commands, 'prepare_and_execute_request', mocked_prepare_execute)
+    with pytest.raises(SystemExit):
+        await interactive_command({})
+    captured = capsys.readouterr()
+    assert escape_ansi(captured.out) == '''Dbgr interactive mode; press ^C to exit.
+req1
+req2
+'''
+
+
+@pytest.mark.asyncio
+async def test_list_command_all(monkeypatch, capsys):
+    requests = {
+        'module1': {
+            'req1': mock_request(name='req1', module='module1'),
+            'req2': mock_request(name='req2', module='module1')
+        },
+        'module2': {
+            'req1': mock_request(name='req1', module='module2'),
+            'req3': mock_request(name='req3', module='module2')
+        }
+    }
+    monkeypatch.setattr(commands, 'get_requests', lambda: requests)
+    await list_command(attrdict({'module': None}))
+    captured = capsys.readouterr()
+    assert escape_ansi(captured.out) == '''module1:
+ - req1
+ - req2
+module2:
+ - req1
+ - req3
+'''
+
+
+@pytest.mark.asyncio
+async def test_list_command_filter_module(monkeypatch, capsys):
+    requests = {
+        'module1': {
+            'req1': mock_request(name='req1', module='module1'),
+            'req2': mock_request(name='req2', module='module1')
+        },
+        'module2': {
+            'req1': mock_request(name='req1', module='module2'),
+            'req3': mock_request(name='req3', module='module2')
+        }
+    }
+    monkeypatch.setattr(commands, 'get_requests', lambda: requests)
+    await list_command(attrdict({'module': 'module1'}))
+    captured = capsys.readouterr()
+    assert escape_ansi(captured.out) == '''module1:
+ - req1
+ - req2
+'''
+
+
+
+@pytest.mark.asyncio
+async def test_list_command_filter_module_request(monkeypatch, capsys):
+    requests = {
+        'module1': {
+            'req1': mock_request(name='req1', module='module1'),
+            'req2': mock_request(name='req2', module='module1')
+        },
+        'module2': {
+            'req1': mock_request(name='req1', module='module2'),
+            'req3': mock_request(name='req3', module='module2')
+        }
+    }
+    monkeypatch.setattr(commands, 'get_requests', lambda: requests)
+    await list_command(attrdict({'module': 'module1:req1'}))
+    captured = capsys.readouterr()
+    assert escape_ansi(captured.out) == '''module1:
+ - req1
+'''
+
+
+@pytest.mark.asyncio
+async def test_list_command_request(monkeypatch, capsys):
+    requests = {
+        'module1': {
+            'req1': mock_request(name='req1', module='module1'),
+            'req2': mock_request(name='req2', module='module1')
+        },
+        'module2': {
+            'req1': mock_request(name='req1', module='module2'),
+            'req3': mock_request(name='req3', module='module2')
+        }
+    }
+    monkeypatch.setattr(commands, 'get_requests', lambda: requests)
+    await list_command(attrdict({'module': ':req1'}))
+    captured = capsys.readouterr()
+    assert escape_ansi(captured.out) == '''module1:
+ - req1
+module2:
+ - req1
+'''

@@ -35,21 +35,9 @@ def mock_request(name='request', module='module', result=None):
     return dbgr.requests.Request(test_request, name=name)
 
 
-def mock_request(name='request', module='module', result=None):
-    async def test_request():
-        return result
-    if module:
-        test_request.__module__ = module
-    return dbgr.requests.Request(test_request, name=name)
-
-
 @pytest.fixture
-def mocked_request(name='request', module='module', result=None):
-    async def test_request():
-        return result
-    if module:
-        test_request.__module__ = module
-    return dbgr.requests.Request(test_request, name=name)
+def mocked_request():
+    return mock_request()
 
 
 class MockedAiohttpSession:
@@ -121,3 +109,9 @@ class MockedResponse:
 class AiohttpParams:
     response: MockedResponse
     url: str = ''
+
+
+class attrdict:
+    def __init__(self, d):
+        self.__dict__ = d
+
