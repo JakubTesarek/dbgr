@@ -5,7 +5,7 @@ from tests.conftest import escape_ansi, attrdict, mock_request
 from dbgr import commands
 from dbgr.commands import (
     argument_parser, interactive_command, request_command, list_command,
-    environments_command, version_command
+    environments_command, version_command, prepare_and_execute_request
 )
 
 
@@ -311,3 +311,54 @@ async def test_request_command(monkeypatch):
     monkeypatch.setattr(commands, 'prepare_and_execute_request', mocked_prepare_execute)
     await request_command(attrdict({'request': 'req1'}))
     assert mocked_prepare_execute.called
+
+
+
+@pytest.mark.asyncio
+async def test_prepare_and_execute_request(monkeypatch):
+    async def mocked_execute_request(request, use_defaults, **arguments):
+        assert request == 'module:request'
+        assert use_defaults == True
+        assert arguments == {
+            'arg1': 'value1',
+            'arg2': 'value2'
+        }
+    monkeypatch.setattr(commands, 'execute_request', mocked_execute_request)
+    monkeypatch.setattr(commands, 'init_environment', lambda _: None)
+    await prepare_and_execute_request(
+        'module:request', attrdict({
+            'arguments': ['arg1=value1', 'arg2=value2'],
+            'use_defaults': True,
+            'env': 'default'
+        })
+    )
+
+
+@pytest.mark.asyncio
+async def test_prepare_and_execute_request_exception(capsys, monkeypatch):
+    async def mocked_execute_request(request, use_defaults, **arguments):
+        raise Exception('It is broken')
+
+    monkeypatch.setattr(commands, 'execute_request', mocked_execute_request)
+    monkeypatch.setattr(commands, 'init_environment', lambda _: None)
+    await prepare_and_execute_request('module:request', attrdict(
+            {'arguments': [], 'use_defaults': True, 'env': 'default' }
+    ))
+    captured = capsys.readouterr()
+    assert escape_ansi(captured.out) == 'It is broken\n'
+
+
+@pytest.mark.asyncio
+async def test_prepare_and_execute_request_assertion_error(capsys, monkeypatch):
+    async def mocked_execute_request(request, use_defaults, **arguments):
+        assert 1 == 2
+
+    monkeypatch.setattr(commands, 'execute_request', mocked_execute_request)
+    monkeypatch.setattr(commands, 'init_environment', lambda _: None)
+    await prepare_and_execute_request('module:request', attrdict(
+            {'arguments': [], 'use_defaults': True, 'env': 'default' }
+    ))
+    lines = escape_ansi(capsys.readouterr().out).splitlines()
+    assert len(lines) == 2
+    assert lines[0].startswith('Assertion error in ')
+    assert lines[1] == 'assert 1 == 2'
