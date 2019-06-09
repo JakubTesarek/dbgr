@@ -1,9 +1,10 @@
 all:
-	@echo 'make clean | build | publish_test | publish | test | changelog'
+	@echo 'make clean | build | publish_test | publish | test | changelog | documentation'
 
 clean:
 	rm -rf *.pyc __pycache__
 	rm -rf kwargs.egg-info build dist
+	cd docs && $(MAKE) clean
 
 build: clean
 	python setup.py sdist bdist_wheel
@@ -29,3 +30,6 @@ test:
 
 changelog:
 	git log --pretty=format:"%s" --reverse `git describe --tags --abbrev=0`..HEAD
+
+documentation:
+	cd docs && $(MAKE) html
