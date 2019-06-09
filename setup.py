@@ -14,7 +14,7 @@ with open('README.md') as readme:
 setup(
     name='dbgr',
     version=__version__,
-    python_requires='>=3.7',
+    python_requires='>=3.6',
     description='REST API testing tool',
     long_description=long_description,
     long_description_content_type='text/markdown',
@@ -23,7 +23,7 @@ setup(
     author_email='jakub@tesarek.me',
     license='APACHE LICENSE 2.0',
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
         'License :: OSI Approved :: Apache Software License',
         'Intended Audience :: Developers'
     ],

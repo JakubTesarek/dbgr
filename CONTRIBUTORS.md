@@ -14,31 +14,15 @@ $ source p3.7/bin/activate
 (p3.7) $ pip install -r requirements.txt -r requirements-dev.py
 ```
 
-Now you have 2 options how to install dbgr.
+> The process for setting up python 3.6 is the same.
 
-### Install with pip
-You can install dbgr from local directory by running this command from the source directory:
+
+Now you can install DBGR from local directory:
 
 ```
 $ source p3.7/bin/activate
 (p3.7) $ pip install -e .
 ```
-
-This will automatically create `dbgr` command so you run `dbgr --version` straight away. Unfortunately, every time you make a change to dbgr source code, you will need to run `pip install -e .` again to re-install it.
-
-### Create alias function
-Other option is to not install DBGR at all and instead add this to your `.bash_profile`:
-
-```
-dbgr() {
-    . <path_to_dbgr>/p3.7/bin/activate
-    eval "$(register-python-argcomplete dbgr)"
-    <path_to_dbgr>/app.py $@
-    deactivate
-}
-```
-
-This will create new function that will activate the Python environment, register autocompleter and run `dbgr/app.py` when you call it.
 
 
 ## Testing

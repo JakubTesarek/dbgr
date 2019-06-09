@@ -25,11 +25,12 @@ async def main():
 
 def dbgr():
     try:
-        exit(asyncio.run(main()))
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(main())
     except KeyboardInterrupt:
         print('')
     except Exception as ex:
-        print(f'{colorama.Fore.RED}{ex}')
+        print(f'{colorama.Fore.RED}{ex}{colorama.Style.RESET_ALL}')
 
 if __name__ == '__main__':
     dbgr()

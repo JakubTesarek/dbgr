@@ -3,7 +3,6 @@ from io import StringIO
 import re
 import pytest
 import dbgr.requests
-from dataclasses import dataclass
 import http.client
 import aiohttp
 from multidict import CIMultiDict
@@ -105,10 +104,10 @@ class MockedResponse:
         return json.loads(self.data)
 
 
-@dataclass
 class AiohttpParams:
-    response: MockedResponse
-    url: str = ''
+    def __init__(self, response, url=''):
+        self.response = response
+        self.url = url
 
 
 class attrdict:

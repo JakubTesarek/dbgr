@@ -26,3 +26,8 @@ def test_format_cache():
 def test_format_none():
     r = Result(None, Type(), False)
     assert escape_ansi(r) == 'Result (NoneType)'
+
+
+def test_format_without_type():
+    r = Result('string value')
+    assert escape_ansi(r) == 'Result (str):\n\'string value\''
