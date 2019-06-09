@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+### [1.1.0] - 2019-06-09
 ### Added
 - Added example with slow responding server to examples
 
