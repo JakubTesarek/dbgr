@@ -1,14 +1,15 @@
-from dataclasses import dataclass
 from pprint import pformat
 import colorama
 from dbgr.types import Type
 
 
-@dataclass
 class Result:
-    _value: object
-    annotation: Type
-    cached: bool = False
+    def __init__(self, value, annotation=None, cached=False):
+        self._value = value
+        self.cached = cached
+        if annotation is None:
+            annotation = Type()
+        self.annotation = annotation
 
     def __str__(self):
         from_cache = ''

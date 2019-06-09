@@ -1,8 +1,12 @@
 # Changelog
 
-## Unreleased
+### [1.1.0] - 2019-06-09
 ### Added
 - Added example with slow responding server to examples
+
+### Changed
+- Achieved 100% code coverage. Build now requires coverage to pass.
+- Python requirement relaxed to >= 3.6.
 
 
 ## [1.0.6] - 2019-06-07

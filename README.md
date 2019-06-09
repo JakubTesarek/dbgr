@@ -43,7 +43,7 @@ The easiest way to install DBGR is via [pypi](https://pypi.org/project/dbgr/).
 pip install dbgr
 ```
 
-DBGR requires Python 3.7. Also, if you want to use terminal autocompletion, you need appropriet bash version or [setup your shell](#autocomplete_and_history).
+DBGR requires Python >=3.6. Also, if you want to use terminal autocompletion, you need appropriet bash version or [setup your shell](#autocomplete_and_history).
 
 > For alternative ways of installation, see [CONTRIBUTORS.md](CONTRIBUTORS.md).
 
