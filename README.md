@@ -2,6 +2,7 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Build Status](https://travis-ci.org/JakubTesarek/dbgr.svg?branch=master)](https://travis-ci.org/JakubTesarek/dbgr)
 [![codecov](https://codecov.io/gh/JakubTesarek/dbgr/branch/master/graph/badge.svg)](https://codecov.io/gh/JakubTesarek/dbgr)
+[![Documentation Status](https://readthedocs.org/projects/dbgr/badge/?version=latest)](https://dbgr.readthedocs.io/en/latest/?badge=latest)
 
 # DBGR
 Dbgr [read 'ˌdiːˈbʌɡər'] is a interactive terminal tool to test and debug HTTP APIs. It offers alternative to [Postman](https://www.getpostman.com/), [Insomnia](https://insomnia.rest/) and other HTTP clients.
@@ -11,6 +12,7 @@ Dbgr [read 'ˌdiːˈbʌɡər'] is a interactive terminal tool to test and debug 
 * You don't have to leave terminal when working with APIs
 * Document your API with code
 
+[Detailed documentation](https://dbgr.readthedocs.io/)
 
 ## Content
 * [Installation and dependencies](#installation-and-dependencies)
