@@ -10,6 +10,8 @@ over their HTTP requests.
 .. _insomnia: https://insomnia.rest/
 
 
+.. _installation:
+
 Installation
 ------------
 The easiest way to install DBGR is via Pypi_:
@@ -24,6 +26,7 @@ The easiest way to install DBGR is via Pypi_:
 
 DBGR requires Python >=3.6.
 
+.. _quick_start:
 
 Quick Start
 -----------
@@ -93,6 +96,9 @@ To execute it, run ``dbgr request get_example``:
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
+
+   requests
+   arguments
 
 
 Indices and tables
