@@ -1,6 +1,13 @@
 # Changelog
 
-### [1.1.0] - 2019-06-09
+## Unreleased
+### Removed
+- Removed unused steps `publish_test` and `changelog`
+
+### Added
+- Added Sphinx documentation
+
+## [1.1.0] - 2019-06-09
 ### Added
 - Added example with slow responding server to examples
 
