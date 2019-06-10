@@ -1,5 +1,5 @@
 all:
-	@echo 'make clean | build | publish_test | publish | test | changelog | documentation'
+	@echo 'make clean | build |publish | test | documentation'
 
 clean:
 	rm -rf *.pyc __pycache__
@@ -8,10 +8,6 @@ clean:
 
 build: clean
 	python setup.py sdist bdist_wheel
-
-publish_test:
-	twine check dist/*
-	twine upload --repository-url https://test.pypi.org/legacy/ dist/*
 
 publish:
 	twine check dist/*
@@ -27,9 +23,6 @@ test:
 		--cov-report html \
 		--cov-report term \
 		--cov-fail-under=100
-
-changelog:
-	git log --pretty=format:"%s" --reverse `git describe --tags --abbrev=0`..HEAD
 
 documentation:
 	cd docs && $(MAKE) html
