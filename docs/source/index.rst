@@ -57,12 +57,42 @@ You can also `download the quickstart from Github`_.
 
 .. _download the quickstart from github: https://github.com/JakubTesarek/dbgr/tree/master/examples/quickstart
 
+You can check that DBGR registered the request by running ``dbgr list``:
+
+.. code-block:: bash
+
+    $ dbgr list
+    quickstart:
+     - get_example
+
+To execute it, run ``dbgr request get_example``:
+
+.. code-block:: bash
+
+    $ dbgr request get_example
+    > GET http://example.com
+    < 200 OK
+    <
+    < Headers:
+    <  Content-Encoding: gzip
+    <  Cache-Control: max-age=604800
+    <  Content-Type: text/html; charset=UTF-8
+    <  Date: Mon, 10 Jun 2019 09:47:15 GMT
+    <  Etag: "1541025663+gzip"
+    <  Expires: Mon, 17 Jun 2019 09:47:15 GMT
+    <  Last-Modified: Fri, 09 Aug 2013 23:54:35 GMT
+    <  Server: ECS (dcb/7F5E)
+    <  Vary: Accept-Encoding
+    <  X-Cache: HIT
+    <  Content-Length: 606
+    <
+    < Content (text/html; charset=UTF-8):
+    Result (NoneType)
 
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
-
 
 
 Indices and tables
