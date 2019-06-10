@@ -88,7 +88,7 @@ with ``--arg <key>=<value>``. DBRG will not prompt you for values it already has
 Default Value
 -------------
 Arguments can have default value so that when you get prompted for the value, you
-can just hit enter to accept the default value.
+can just hit enter to accept it.
 
 .. code-block:: python
 
@@ -148,8 +148,6 @@ Order of Precedence of Arguments
 There is many way to specify value for arguments. It's important to understant in
 which order they get resolved.
 
-1. First DBGR will take all the values specified with ``--arg`` in ``dbgr r`` command
-and assigns them.
-2. If you used ``--use-defaults`` DBGR will assign default value to every argument that
-has one.
+1. First DBGR will take all the values specified with ``--arg`` in ``dbgr r`` command and assigns them.
+2. If you used ``--use-defaults`` DBGR will assign default value to every argument that has one.
 3. DBGR  will prompt you for values for all remaining arguments.

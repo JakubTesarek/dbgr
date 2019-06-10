@@ -99,6 +99,7 @@ To execute it, run ``dbgr request get_example``:
 
    requests
    arguments
+   types
 
 
 Indices and tables
