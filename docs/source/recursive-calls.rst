@@ -6,6 +6,10 @@ Sometimes you might need to make a different request before executing what you r
 want to do. For example, to download user data, you need to login first. You can do
 that by using coroutine :func:`dbgr.response`.
 
+.. warning::
+    DBGR doesn't detect or prevent reccursion. Be carefull not to unintentionaly
+    cause DDoS on your (or someone elses) servers.
+
 Response accepts one required argument - the name of the request to execute as
 string:
 
@@ -36,7 +40,7 @@ string:
     :param bool cache:
         Boolean flag if DBGR should use return value from cache, if available. Applicable
         only to requests with cache turned on. More about it in
-        :ref:`Cache section<cache>`. (optional)
+        :ref:`Cache section<caching>`. (optional)
 
 .. code-block:: python
 
@@ -74,4 +78,3 @@ string:
 .. tip::
     You can call requests with fully qualified name
     :ref:`in the same way you do when calling requests from terminal<executing_requests>`.
-

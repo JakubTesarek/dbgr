@@ -1,6 +1,21 @@
 DBGR: HTTP client that gives you full control
 =============================================
 
+|PyPI version| |License| |Build Status| |Code Coverage| |Documentation Status|
+
+.. |PyPI version| image:: https://badge.fury.io/py/dbgr.svg
+   :target: https://badge.fury.io/py/dbgr
+.. |License| image:: https://img.shields.io/badge/License-Apache%202.0-blue.svg
+   :target: https://opensource.org/licenses/Apache-2.0
+.. |Build Status| image:: https://travis-ci.org/JakubTesarek/dbgr.svg?branch=master
+   :target: https://travis-ci.org/JakubTesarek/dbgr
+.. |Code Coverage| image:: https://codecov.io/gh/JakubTesarek/dbgr/branch/master/graph/badge.svg
+   :target: https://codecov.io/gh/JakubTesarek/dbgr
+.. |Documentation Status| image:: https://readthedocs.org/projects/dbgr/badge/?version=latest
+   :target: https://dbgr.readthedocs.io/en/latest/?badge=latest
+
+
+
 Dbgr [read 'ˌdiːˈbʌɡər'] is a interactive terminal tool to test and debug HTTP APIs.
 It offers alternative to Postman_, Insomnia_ and other HTTP clients. It is designed
 for programmers that prefer to use code instead of graphical tools and want full control
