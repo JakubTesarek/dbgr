@@ -115,12 +115,6 @@ Missing parts will be filled-in with current value as the table bellow shows.
 | time      | time        | input value directly         |
 +-----------+-------------+------------------------------+
 
-.. _datetime_type:
-
-Datetime Type
-~~~~~~~~~~~~~
-Datetime type will convert string you input to ``datetime.datetime``.
-
 .. code-block:: python
 
     from datetime import datetime
@@ -139,5 +133,3 @@ Datetime type will convert string you input to ``datetime.datetime``.
     publish_date [type: datetime]: tomorrow # tomorrow date with current time
     > PATCH
     < 201 No Content
-
-
