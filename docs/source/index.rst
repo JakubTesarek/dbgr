@@ -100,6 +100,7 @@ To execute it, run ``dbgr request get_example``:
    requests
    arguments
    types
+   recursive-calls
 
 
 Indices and tables

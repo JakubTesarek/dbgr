@@ -1,10 +1,11 @@
+.. _requests:
+
 Requests
 ========
 
 Request is a coroutine decorated with ``@dbgr.requests``. DBGR searches all ``.py``
 files in currect directory and register all requests. You can check which requests
 DBGR sees by running ``dbgr list``:
-
 
 .. code-block:: python
 
@@ -32,6 +33,7 @@ DBGR sees by running ``dbgr list``:
        Arguments:
         - post_id [default: 1, type: int]
 
+.. _executing_requests:
 
 Executing Requests
 ------------------
