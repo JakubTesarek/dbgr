@@ -94,13 +94,21 @@ To execute it, run ``dbgr request get_example``:
 
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+    :maxdepth: 2
+    :caption: Contents:
 
-   requests
-   arguments
-   types
-   recursive-calls
+    requests
+    arguments
+    return-value
+    types
+    recursive-calls
+    caching
+    asserts
+    environment
+    terminal-interface
+    help
+    contributing
+    licence
 
 
 Indices and tables
