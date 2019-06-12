@@ -14,8 +14,6 @@ DBGR: HTTP client that gives you full control
 .. |Documentation Status| image:: https://readthedocs.org/projects/dbgr/badge/?version=latest
    :target: https://dbgr.readthedocs.io/en/latest/?badge=latest
 
-
-
 Dbgr [read 'ˌdiːˈbʌɡər'] is a interactive terminal tool to test and debug HTTP APIs.
 It offers alternative to Postman_, Insomnia_ and other HTTP clients. It is designed
 for programmers that prefer to use code instead of graphical tools and want full control
@@ -24,23 +22,30 @@ over their HTTP requests.
 .. _postman: https://www.getpostman.com/
 .. _insomnia: https://insomnia.rest/
 
-.. _features:
+.. tip::
+    `Full documentation can be found on Read the Docs`_
+
+.. _`full documentation can be found on read the docs`: https://dbgr.readthedocs.io/en/latest/
 
 Features
 --------
-- :ref:`Terminal interface with autocomplete and bash history<terminal_interface>`
-- :ref:`Full control over your requests with Python<requests>`
-- :ref:`Recursive calls<recursive_calls>`
-- :ref:`Local caching of responses<caching>`
-- :ref:`Customizable interface<types>`
+- `Terminal interface with autocomplete and bash history`_
+- `Full control over your requests with Python`_
+- `Recursive calls`_
+- `Local caching of responses`_
+- `Customizable interface`_
+
+.. _`Terminal interface with autocomplete and bash history`: https://dbgr.readthedocs.io/en/latest/terminal-interface.html
+.. _`Full control over your requests with Python`: https://dbgr.readthedocs.io/en/latest/requests.html#requests
+.. _`Recursive calls`: https://dbgr.readthedocs.io/en/latest/recursive-calls.html#recursive-calls
+.. _`Local caching of responses`: https://dbgr.readthedocs.io/en/latest/caching.html
+.. _`Customizable interface`: https://dbgr.readthedocs.io/en/latest/types.html#types
 
 |screencast|
 
 .. |screencast| image:: https://asciinema.org/a/tnDyDebgMmwwVBTUX8M2OrJ4a.svg
         :alt: DBGR Basic Usage Example
         :target: https://asciinema.org/a/tnDyDebgMmwwVBTUX8M2OrJ4a?autoplay=1
-
-.. _installation:
 
 Installation
 ------------
@@ -55,8 +60,6 @@ The easiest way to install DBGR is via PyPi_:
     1.1.0
 
 DBGR requires Python >=3.6.
-
-.. _quick_start:
 
 Quick Start
 -----------
@@ -122,28 +125,7 @@ To execute it, run ``dbgr request get_example``:
     < Content (text/html; charset=UTF-8):
     Result (NoneType)
 
+.. tip::
+    `Full documentation can be found on Read the Docs`_
 
-.. toctree::
-    :maxdepth: 2
-    :caption: Contents:
-
-    requests
-    arguments
-    return-value
-    types
-    recursive-calls
-    caching
-    asserts
-    environment
-    terminal-interface
-    help
-    contributing
-    licence
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+.. _`full documentation can be found on read the docs`: https://dbgr.readthedocs.io/en/latest/
