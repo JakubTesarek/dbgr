@@ -74,7 +74,7 @@ Building distribution
 These steps are mandatory only when preparing for release. Individual developers don't need to worry about them.
 
 1. Run all tests, make sure they all pass and the code coverage is 100%.
-2. Move appropriet changes from ``# Unreleased`` section in ``CHANGELOG.md`` to new version.
+2. Move appropriet changes from ``# Unreleased`` section in ``CHANGELOG.rst`` to new version.
 3. Change version in ``dbgr/meta.py``
 4. Build distribution, make sure there are no errors
 
@@ -86,7 +86,7 @@ These steps are mandatory only when preparing for release. Individual developers
 6. Create new `Github release`_
 
     - Upload content of ``dist``
-    - Copy latest changes from ``CHANGELOG.md`` to release description
+    - Copy latest changes from ``CHANGELOG.rst`` to release description
 
 7. Upload content of ``dist`` to PyPi_.
 
