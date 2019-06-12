@@ -1,16 +1,17 @@
-.. _contributing:
-
 Contributing
 ============
 Thank considering your contribution to DBGR. Any help or feedback is greatly appreciated.
 
+
+   `Full documentation can be found on Read the Docs`_
+
+.. _`full documentation can be found on read the docs`: https://dbgr.readthedocs.io/en/latest/
+
 Development setup
 -----------------
-If you want to develop debugger locally, there is an alternative installation process
-that will make this experience easier.
+If you want to develop debugger locally, there is an alternative installation process that will make this experience easier.
 
-First, `fork DBGR repository`_. Then you can clone the forked repo and create local
-environment:
+First, `fork DBGR repository`_. Then you can clone the forked repo and create local environment:
 
 .. _`fork DBGR repository`: https://help.github.com/en/articles/fork-a-repo
 
@@ -39,12 +40,10 @@ Testing
 
     (env3.7) $ make test
 
-This will run all unit-tests and generate coverage report. 100% test coverage is
-mandatory.
+This will run all unit-tests and generate coverage report. 100% test coverage is mandatory.
 
-.. tip::
-    The file ``Makefile`` contains other commands that can be usefull when developing
-    DBGR. Run ``make`` to see all the available commands.
+    The file `Makefile` contains other commands that can be usefull when developing
+    DBGR. Run `make` to see all the available commands.
 
 Linting
 -------
@@ -72,8 +71,7 @@ All new features and changes have to be documented.
 
 Building distribution
 ---------------------
-These steps are mandatory only when preparing for release. Individual developers don't
-need to worry about them.
+These steps are mandatory only when preparing for release. Individual developers don't need to worry about them.
 
 1. Run all tests, make sure they all pass and the code coverage is 100%.
 2. Move appropriet changes from ``# Unreleased`` section in ``CHANGELOG.md`` to new version.
@@ -85,7 +83,7 @@ need to worry about them.
         (env3.7) $ make build
 
 5. Tag new version on Github
-6. Create new `Github release`_ 
+6. Create new `Github release`_
 
     - Upload content of ``dist``
     - Copy latest changes from ``CHANGELOG.md`` to release description
