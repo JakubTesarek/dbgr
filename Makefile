@@ -1,5 +1,5 @@
 all:
-	@echo 'make clean | build |publish | test | documentation'
+	@echo 'make clean | build | publish | test | documentation'
 
 clean:
 	rm -rf *.pyc __pycache__
