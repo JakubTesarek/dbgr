@@ -13,7 +13,7 @@ that by using coroutine :func:`dbgr.response`.
 Response accepts one required argument - the name of the request to execute as
 string:
 
-.. method:: dbgr.response(request_name, env=None, session=None, use_defaults=False, cache=True, \*\*kwargs)
+.. function:: dbgr.response(request_name, env=None, session=None, use_defaults=False, cache=True, \*\*kwargs)
 
     Coroutine to make recursive requests.
 
