@@ -8,7 +8,7 @@ with open('requirements.txt') as fp:
 with open('requirements-dev.txt') as fp:
     extras_require = fp.read()
 
-with open('README.md') as readme:
+with open('README.rst') as readme:
     long_description = readme.read()
 
 setup(
@@ -17,7 +17,7 @@ setup(
     python_requires='>=3.6',
     description='REST API testing tool',
     long_description=long_description,
-    long_description_content_type='text/markdown',
+    long_description_content_type='text/x-rst',
     url='https://github.com/JakubTesarek/dbgr',
     author='Jakub Tesárek',
     author_email='jakub@tesarek.me',
