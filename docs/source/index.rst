@@ -24,6 +24,15 @@ over their HTTP requests.
 .. _postman: https://www.getpostman.com/
 .. _insomnia: https://insomnia.rest/
 
+.. _features:
+
+Features
+--------
+- :ref:`Terminal interface with autocomplete and bash history<terminal_interface>`
+- :ref:`Full control over your requests with Python<requests>`
+- :ref:`Recursive calls<recursive_calls>`
+- :ref:`Local caching of responses<caching>`
+- :ref:`Customizable interface<types>`
 
 .. _installation:
 
