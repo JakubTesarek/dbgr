@@ -34,6 +34,12 @@ Features
 - :ref:`Local caching of responses<caching>`
 - :ref:`Customizable interface<types>`
 
+|screencast|
+
+.. |screencast| image:: https://asciinema.org/a/tnDyDebgMmwwVBTUX8M2OrJ4a.svg
+        :alt: DBGR Basic Usage Example
+        :target: https://asciinema.org/a/tnDyDebgMmwwVBTUX8M2OrJ4a?autoplay=1
+
 .. _installation:
 
 Installation
