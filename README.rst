@@ -22,8 +22,7 @@ over their HTTP requests.
 .. _postman: https://www.getpostman.com/
 .. _insomnia: https://insomnia.rest/
 
-.. tip::
-    `Full documentation can be found on Read the Docs`_
+   `Full documentation can be found on Read the Docs`_
 
 .. _`full documentation can be found on read the docs`: https://dbgr.readthedocs.io/en/latest/
 
@@ -66,6 +65,11 @@ Quick Start
 First step when working with DBGR is to create a directory which will DBGR search
 for requests and environment settings.
 
+   You can also `download the quickstart from Github`_.
+
+.. _download the quickstart from github: https://github.com/JakubTesarek/dbgr/tree/master/examples/quickstart
+
+
 .. code-block:: bash
 
     $ mkdir quickstart
@@ -87,11 +91,6 @@ Now create another file, call it ``quickstart.py`` and place create your first r
     @request
     async def get_example(session):
         await session.get('http://example.com')
-
-.. tip::
-    You can also `download the quickstart from Github`_.
-
-.. _download the quickstart from github: https://github.com/JakubTesarek/dbgr/tree/master/examples/quickstart
 
 You can check that DBGR registered the request by running ``dbgr list``:
 
@@ -125,7 +124,7 @@ To execute it, run ``dbgr request get_example``:
     < Content (text/html; charset=UTF-8):
     Result (NoneType)
 
-.. tip::
-    `Full documentation can be found on Read the Docs`_
 
-.. _`full documentation can be found on read the docs`: https://dbgr.readthedocs.io/en/latest/
+`Read the full documentation on Read the Docs`_
+
+.. _`read the full documentation read the docs`: https://dbgr.readthedocs.io/en/latest/
