@@ -127,4 +127,4 @@ To execute it, run ``dbgr request get_example``:
 
 `Read the full documentation on Read the Docs`_
 
-.. _`read the full documentation read the docs`: https://dbgr.readthedocs.io/en/latest/
+.. _`read the full documentation on read the docs`: https://dbgr.readthedocs.io/en/latest/
