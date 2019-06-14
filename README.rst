@@ -42,9 +42,9 @@ Features
 
 |screencast|
 
-.. |screencast| image:: https://asciinema.org/a/tnDyDebgMmwwVBTUX8M2OrJ4a.svg
+.. |screencast| image:: https://asciinema.org/a/uNs262JVwxY2d1BGZTdRvDsWH.svg
         :alt: DBGR Basic Usage Example
-        :target: https://asciinema.org/a/tnDyDebgMmwwVBTUX8M2OrJ4a?autoplay=1
+        :target:https: //asciinema.org/a/uNs262JVwxY2d1BGZTdRvDsWH
 
 Installation
 ------------
