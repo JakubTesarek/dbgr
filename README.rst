@@ -44,7 +44,7 @@ Features
 
 .. |screencast| image:: https://asciinema.org/a/uNs262JVwxY2d1BGZTdRvDsWH.svg
         :alt: DBGR Basic Usage Example
-        :target:https: //asciinema.org/a/uNs262JVwxY2d1BGZTdRvDsWH
+        :target:https: https://asciinema.org/a/uNs262JVwxY2d1BGZTdRvDsWH
 
 Installation
 ------------
