@@ -215,6 +215,29 @@ req2
 
 
 @pytest.mark.asyncio
+async def test_interactive_command_strips_whitespaces(capsys, monkeypatch):
+    async def mocked_prepare_execute(req, arg):
+        assert req == 'request'
+        print(req)
+
+    inputs = ['request    ', '\x03']
+    def mocked_input(prompt):
+        i = inputs.pop(0)
+        if i == '\x03':
+            raise SystemExit()
+        return i
+
+    monkeypatch.setattr('builtins.input', mocked_input)
+    monkeypatch.setattr(commands, 'prepare_and_execute_request', mocked_prepare_execute)
+    with pytest.raises(SystemExit):
+        await interactive_command({})
+    captured = capsys.readouterr()
+    assert escape_ansi(captured.out) == '''Dbgr interactive mode; press ^C to exit.
+request
+'''
+
+
+@pytest.mark.asyncio
 async def test_list_command_all(monkeypatch, capsys):
     requests = {
         'module1': {

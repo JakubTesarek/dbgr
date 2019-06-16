@@ -35,7 +35,7 @@ async def interactive_command(args):
     print(f'{colorama.Style.DIM}Dbgr interactive mode; press ^C to exit.')
     try:
         while True:
-            request = input('> ')
+            request = input('> ').strip()
             await prepare_and_execute_request(request, args)
     finally:
         await close_session()
