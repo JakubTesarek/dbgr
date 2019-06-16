@@ -52,7 +52,18 @@ async def request_command(args):
 async def list_command(args):
     ''' List all available requests and their arguments '''
     l_module, l_request = parse_module_name(args.module)
-    for module, requests in get_requests().items():
+    requests = get_requests()
+    if not requests:
+        print(f'{colorama.Fore.RED}No requests found.')
+        return
+    if l_module and l_module not in requests:
+        print(f'{colorama.Fore.RED}Module "{l_module}" does not exist.')
+        return
+    if l_module and l_request and l_request not in requests[l_module]:
+        print(f'{colorama.Fore.RED}Request "{l_request}" does not exist in module "{l_module}".')
+        return
+    request_printed = False
+    for module, requests in requests.items():
         module_printed = False
         if not l_module or module == l_module:
             for request in requests.values():
@@ -60,8 +71,10 @@ async def list_command(args):
                     if not module_printed:
                         print(f'{colorama.Style.BRIGHT}{module}:')
                         module_printed = True
+                        request_printed = True
                     print(textwrap.indent(str(request), ' '), end='')
-
+        if not request_printed and l_request:
+            print(f'{colorama.Fore.RED}Request "{l_request}" does not exist in any module.')
 
 async def environments_command(args): # pylint: disable=W0613
     '''

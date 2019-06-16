@@ -304,6 +304,48 @@ async def test_list_command_filter_module_request(monkeypatch, capsys):
 
 
 @pytest.mark.asyncio
+async def test_list_command_no_requests(monkeypatch, capsys):
+    monkeypatch.setattr(commands, 'get_requests', lambda: {})
+    await list_command(attrdict({'module': None}))
+    captured = capsys.readouterr()
+    assert escape_ansi(captured.out) == 'No requests found.\n'
+
+
+@pytest.mark.asyncio
+async def test_list_command_module_not_found(monkeypatch, capsys):
+    requests = {
+        'module': {'req': mock_request(name='req', module='module')}
+    }
+    monkeypatch.setattr(commands, 'get_requests', lambda: requests)
+    await list_command(attrdict({'module': 'module_404'}))
+    captured = capsys.readouterr()
+    assert escape_ansi(captured.out) == 'Module "module_404" does not exist.\n'
+
+
+@pytest.mark.asyncio
+async def test_list_command_request_not_found_in_any_module(monkeypatch, capsys):
+    requests = {
+        'module': {'req': mock_request(name='req', module='module')}
+    }
+    monkeypatch.setattr(commands, 'get_requests', lambda: requests)
+    await list_command(attrdict({'module': ':request_404'}))
+    captured = capsys.readouterr()
+    assert escape_ansi(captured.out) == 'Request "request_404" does not exist in any module.\n'
+
+
+@pytest.mark.asyncio
+async def test_list_command_module_and_request_not_found(monkeypatch, capsys):
+    requests = {
+        'module1': {'req1': mock_request(name='req1', module='module1')},
+        'module2': {'req2': mock_request(name='req2', module='module2')}
+    }
+    monkeypatch.setattr(commands, 'get_requests', lambda: requests)
+    await list_command(attrdict({'module': 'module1:request2'}))
+    captured = capsys.readouterr()
+    assert escape_ansi(captured.out) == 'Request "request2" does not exist in module "module1".\n'
+
+
+@pytest.mark.asyncio
 async def test_list_command_request(monkeypatch, capsys):
     requests = {
         'module1': {

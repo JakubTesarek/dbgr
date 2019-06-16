@@ -16,6 +16,7 @@ Added
 Fixed
 ~~~~~
 - Strip whitespaces from request name in interactive mode.
+- DBGR now shows a message when ``dbgr list`` doesn't find module or request.
 
 
 [1.1.0] - 2019-06-09
