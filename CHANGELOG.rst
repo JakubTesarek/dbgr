@@ -13,6 +13,10 @@ Added
 - Added Sphinx documentation
 - Added request headers and data to terminal output
 
+Fixed
+~~~~~
+- Strip whitespaces from request name in interactive mode.
+
 
 [1.1.0] - 2019-06-09
 --------------------
