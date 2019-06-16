@@ -152,10 +152,12 @@ class Reporter():
                 print(self.highlight_content(part.content_type, part._value))
 
     def get_request_data(self, request_context):
+        data = None
         if hasattr(request_context, 'json'):
-            return json.dumps(request_context.json)
-        elif hasattr(request_context, 'data') and request_context.data:
-            return request_context.data
+            data = json.dumps(request_context.json)
+        if hasattr(request_context, 'data') and request_context.data:
+            data = request_context.data
+        return data
 
     def get_request_content_type(self, response):
         return response.request_info.headers.get('content-type')
