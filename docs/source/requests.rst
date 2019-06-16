@@ -44,9 +44,15 @@ Name of request is simply a name of the decorated coroutine.
 
     $ dbgr request posts
     > GET http://jsonplaceholder.typicode.com/posts
-    < 200 OK
+    > 200 OK
+    >
+    > Request headers:
+    >  Host: jsonplaceholder.typicode.com
+    >  Accept: */*
+    >  Accept-Encoding: gzip, deflate
+    >  User-Agent: Python/3.6 aiohttp/3.5.4
     <
-    < Headers:
+    < Response Headers:
     <  Date: Mon, 10 Jun 2019 10:07:28 GMT
     <  Content-Type: application/json; charset=utf-8
     <  Transfer-Encoding: chunked
@@ -54,7 +60,7 @@ Name of request is simply a name of the decorated coroutine.
     <  Expires: Mon, 10 Jun 2019 14:07:28 GMT
     <  Content-Encoding: gzip
     <
-    < Content (application/json; charset=utf-8):
+    < Response data (application/json; charset=utf-8):
     [
       {
         "body": "quia et suscipit\nsuscipit recusandae consequuntur",
@@ -78,9 +84,15 @@ search. Module name is simply the name of the file without ``.py``.
     Request "posts" found in multiple modules: placeholder, another_module
     $ dbgr request placeholder:posts
     > GET http://jsonplaceholder.typicode.com/posts
-    < 200 OK
+    > 200 OK
+    >
+    > Request headers:
+    >  Host: jsonplaceholder.typicode.com
+    >  Accept: */*
+    >  Accept-Encoding: gzip, deflate
+    >  User-Agent: Python/3.6 aiohttp/3.5.4
     <
-    < Headers:
+    < Response headers:
     <  Date: Mon, 10 Jun 2019 10:07:28 GMT
     <  Content-Type: application/json; charset=utf-8
     <  Transfer-Encoding: chunked
@@ -88,7 +100,7 @@ search. Module name is simply the name of the file without ``.py``.
     <  Expires: Mon, 10 Jun 2019 14:07:28 GMT
     <  Content-Encoding: gzip
     <
-    < Content (application/json; charset=utf-8):
+    < Response data (application/json; charset=utf-8):
     [
       {
         "body": "quia et suscipit\nsuscipit recusandae consequuntur",
