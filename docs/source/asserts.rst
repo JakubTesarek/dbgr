@@ -15,9 +15,15 @@ DBGR supports assertions in requests. If an assert fails, it will get reported t
 .. code-block:: bash
 
     > GET http://example.com
-    < 200 OK
+    > 200 OK
+    >
+    > Request headers:
+    >  Host: example.com
+    >  Accept: */*
+    >  Accept-Encoding: gzip, deflate
+    >  User-Agent: Python/3.6 aiohttp/3.5.4
     <
-    < Headers:
+    < Response headers:
     <  Content-Encoding: gzip
     <  Accept-Ranges: bytes
     <  Cache-Control: max-age=604800

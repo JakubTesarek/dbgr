@@ -104,26 +104,45 @@ To execute it, run ``dbgr request get_example``:
 
 .. code-block:: bash
 
-    $ dbgr request get_example
+    # Output in this example is shortened
     > GET http://example.com
-    < 200 OK
+    > 200 OK
+    >
+    > Request headers:
+    >  Host: example.com
+    >  Accept: */*
+    >  Accept-Encoding: gzip, deflate
+    >  User-Agent: Python/3.6 aiohttp/3.5.4
     <
-    < Headers:
+    < Response headers:
     <  Content-Encoding: gzip
+    <  Accept-Ranges: bytes
     <  Cache-Control: max-age=604800
     <  Content-Type: text/html; charset=UTF-8
-    <  Date: Mon, 10 Jun 2019 09:47:15 GMT
-    <  Etag: "1541025663+gzip"
-    <  Expires: Mon, 17 Jun 2019 09:47:15 GMT
+    <  Date: Sun, 16 Jun 2019 15:29:41 GMT
     <  Last-Modified: Fri, 09 Aug 2013 23:54:35 GMT
-    <  Server: ECS (dcb/7F5E)
-    <  Vary: Accept-Encoding
-    <  X-Cache: HIT
     <  Content-Length: 606
     <
-    < Content (text/html; charset=UTF-8):
-    Result (NoneType)
+    < Response data (text/html):
+    <!doctype html>
+    <html>
+    <head>
+        <title>Example Domain</title>
+        <meta charset="utf-8" />
+        <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+    </head>
 
+    <body>
+    <div>
+        <h1>Example Domain</h1>
+        <p>This domain is established to be used for illustrative examples in documents. You may use this
+        domain in examples without prior coordination or asking for permission.</p>
+        <p><a href="http://www.iana.org/domains/example">More information...</a></p>
+    </div>
+    </body>
+    </html>
+    Result (NoneType)
 
 `Read the full documentation on Read the Docs`_
 

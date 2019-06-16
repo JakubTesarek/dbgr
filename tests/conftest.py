@@ -1,3 +1,4 @@
+import types
 import builtins
 from io import StringIO
 import re
@@ -83,12 +84,17 @@ def mock_registered_requests(monkeypatch):
 
 
 class MockedResponse:
-    def __init__(self, url='', method='GET', status=200, headers=None, data=None):
+    def __init__(
+            self, url='', method='GET', status=200, headers=None, data=None,
+            request=None):
+        request = {'headers': {}} if request is None else request
+        request['headers'] = CIMultiDict(request['headers'])
         self.url = url
         self.method = method
         self.headers = CIMultiDict(headers if headers else {})
         self.status = status
         self.data = data
+        self.request_info = types.SimpleNamespace(**request)
 
     @property
     def reason(self):
@@ -103,6 +109,11 @@ class MockedResponse:
             raise aiohttp.ContentTypeError()
         return json.loads(self.data)
 
+
+class MockedTraceContext:
+    def __init__(self, **kwargs):
+        self.trace_request_ctx = types.SimpleNamespace(**kwargs)
+    
 
 class AiohttpParams:
     def __init__(self, response, url=''):

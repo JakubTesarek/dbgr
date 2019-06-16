@@ -11,6 +11,7 @@ Removed
 Added
 ~~~~~
 - Added Sphinx documentation
+- Added request headers and data to terminal output
 
 
 [1.1.0] - 2019-06-09

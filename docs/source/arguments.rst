@@ -31,9 +31,15 @@ will prompt you for the value when you execute the request.
     $ dbgr r post
     post_id: 1
     > GET http://jsonplaceholder.typicode.com/post/1
-    < 200 OK
+    > 200 OK
+    >
+    > Request headers:
+    >  Host: jsonplaceholder.typicode.com
+    >  Accept: */*
+    >  Accept-Encoding: gzip, deflate
+    >  User-Agent: Python/3.6 aiohttp/3.5.4
     <
-    < Headers:
+    < Response headers:
     <  Date: Mon, 10 Jun 2019 10:07:28 GMT
     <  Content-Type: application/json; charset=utf-8
     <  Transfer-Encoding: chunked
@@ -41,7 +47,7 @@ will prompt you for the value when you execute the request.
     <  Expires: Mon, 10 Jun 2019 14:07:28 GMT
     <  Content-Encoding: gzip
     <
-    < Content (application/json; charset=utf-8):
+    < Response data (application/json; charset=utf-8):
     {
         "body": "quia et suscipit\nsuscipit recusandae consequuntur",
         "id": 1,
@@ -65,9 +71,15 @@ with ``--arg <key>=<value>``. DBRG will not prompt you for values it already has
 
     $ dbgr r post --arg post_id=1
     > GET http://jsonplaceholder.typicode.com/post/1
-    < 200 OK
+    > 200 OK
+    >
+    > Request headers:
+    >  Host: jsonplaceholder.typicode.com
+    >  Accept: */*
+    >  Accept-Encoding: gzip, deflate
+    >  User-Agent: Python/3.6 aiohttp/3.5.4
     <
-    < Headers:
+    < Response headers:
     <  Date: Mon, 10 Jun 2019 10:07:28 GMT
     <  Content-Type: application/json; charset=utf-8
     <  Transfer-Encoding: chunked
@@ -75,7 +87,7 @@ with ``--arg <key>=<value>``. DBRG will not prompt you for values it already has
     <  Expires: Mon, 10 Jun 2019 14:07:28 GMT
     <  Content-Encoding: gzip
     <
-    < Content (application/json; charset=utf-8):
+    < Response data (application/json; charset=utf-8):
     {
         "body": "quia et suscipit\nsuscipit recusandae consequuntur",
         "id": 1,
