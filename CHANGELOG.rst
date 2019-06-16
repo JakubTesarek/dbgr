@@ -2,8 +2,8 @@ Changelog
 =========
 
 
-Unreleased
-----------
+[1.2.0] - 2019-06-16
+--------------------
 Removed
 ~~~~~~~
 - Removed unused steps `publish_test` and `changelog`
