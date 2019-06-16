@@ -4,8 +4,8 @@ from datetime import datetime
 from itertools import cycle
 import cgi
 import aiohttp
-from pygments import highlight
-from pygments.lexers import JsonLexer, XmlLexer, HtmlLexer # pylint: disable=E0611
+from pygments import highlight, lexers
+from pygments.util import ClassNotFound as LexerNotFound
 from pygments.formatters import TerminalFormatter # pylint: disable=E0611
 from colorama import Style, Fore
 
@@ -66,6 +66,7 @@ class Reporter():
         print(f'{Style.DIM}<{Style.RESET_ALL}{" "*(indent+1)}{text}'.strip())
 
     def p_in_h1(self, text, sup=None, indent=0):
+        self.p_in()
         if sup:
             self.p_in(
                 f'{Fore.YELLOW}{text}{Style.RESET_ALL} {Style.DIM}({sup}){Style.RESET_ALL}:',
@@ -75,6 +76,7 @@ class Reporter():
             self.p_in(f'{Fore.YELLOW}{text}:', indent=indent)
 
     def p_out_h1(self, text, sup=None, indent=0):
+        self.p_out()
         if sup:
             self.p_out(
                 f'{Fore.YELLOW}{text}{Style.RESET_ALL} {Style.DIM}({sup}){Style.RESET_ALL}:',
@@ -89,51 +91,41 @@ class Reporter():
             indent=1
         )
 
-    def p_json(self, json_data):
-        output = json.dumps(json_data, sort_keys=True, indent=2)
-        print(highlight(output, JsonLexer(), TerminalFormatter()).strip())
-
-    def p_xml(self, xml_data):
-        print(highlight(xml_data, XmlLexer(), TerminalFormatter()).strip())
-
-    def p_html(self, html_data):
-        print(highlight(html_data, HtmlLexer(), TerminalFormatter()).strip())
-
-    def p_text(self, text_data):
-        print(text_data)
-
     async def print_request(self, response):
         self.p_out(f'{Style.BRIGHT}{response.method} {response.url}')
 
     async def print_info(self, response):
-        if response.status < 400:
-            color = Fore.GREEN
-        else:
-            color = Fore.RED
+        color = Fore.GREEN if response.status < 400 else Fore.RED
         self.p_out(f'{color}{response.status} {response.reason}')
 
     async def print_response_headers(self, response):
-        self.p_in()
         self.p_in_h1('Response headers')
         for name, value in response.headers.items():
             self.p_in(f'{name}: {value}', indent=1)
 
+    def highlight_content(self, mime, data):
+        if mime.startswith('application/json'):
+            data = json.dumps(json.loads(data), sort_keys=True, indent=2)
+        try:
+            lexer = lexers.get_lexer_for_mimetype(mime)
+            data = highlight(data, lexer, TerminalFormatter())
+        except LexerNotFound:
+            pass
+        return data.strip()
+
+    def get_response_content_type(self, response):
+        return response.headers.get('content-type')
+
     async def print_response(self, response):
-        self.p_in()
-        self.p_in_h1(f'Response data', sup=response.headers["Content-Type"])
-        if 'application/json' in response.headers['Content-Type']:
-            self.p_json(await response.json())
-        elif 'application/xml' in response.headers['Content-Type']:
-            self.p_xml(await response.text())
-        elif 'text/plain' in response.headers['Content-Type']:
-            self.p_text(await response.text())
-        elif 'text/html' in response.headers['Content-Type']:
-            self.p_html(await response.text())
+        content_type = self.get_response_content_type(response)
+        self.p_in_h1(f'Response data', sup=content_type)
+        if content_type.startswith('application/json'):
+            data = json.dumps(await response.json(), sort_keys=True, indent=2)
         else:
-            self.p_text(await response.text())
+            data = await response.text()
+        print(self.highlight_content(content_type, data))
 
     async def print_request_headers(self, response):
-        self.p_out()
         self.p_out_h1('Request headers')
         for name, value in response.request_info.headers.items():
             self.p_out(f'{name}: {value}', indent=1)
@@ -142,34 +134,41 @@ class Reporter():
         _, params = cgi.parse_header(part.headers['content-disposition'])
         return params.get('name', '# Part')
 
-    async def print_request_data(self, response, request_context):
-        if hasattr(request_context, 'json') or hasattr(request_context, 'data'):
-            self.p_out()
-            self.p_out_h1('Request data', sup=response.request_info.headers['content-type'])
-        if hasattr(request_context, 'json'):
-            self.p_json(request_context.json)
-        elif hasattr(request_context, 'data') and request_context.data:
-            data = request_context.data
-            if isinstance(data, aiohttp.multipart.MultipartWriter):
-                for part, _, __ in data:
-                    self.p_out_h2(self.get_part_name(part), sup=part.content_type)
-                    if part.filename:
-                        self.p_out(f'- Filename: {part.filename}', indent=1)
-                    if part.encoding:
-                        self.p_out(f'- Encoding: {part.encoding}', indent=1)
-                    self.p_out(f'- Size: {part.size}B', indent=1)
-                    self.p_out(f'- Headers:', indent=1)
-                    for key, value in part.headers.items():
-                        self.p_out(f'{key}: {value}', indent=4)
-                    self.p_out(f'- Content:', indent=1)
-                    if isinstance(part, aiohttp.payload.JsonPayload):
-                        self.p_json(json.loads(part._value))
-                    elif isinstance(part, aiohttp.payload.BufferedReaderPayload):
-                        print(f'{Style.DIM}Contents of "{part._value.name}"')
-                    else:
-                        self.p_text(part._value)
+    def print_multipart_request_data(self, data):
+        for part, _, __ in data:
+            self.p_out_h2(self.get_part_name(part), sup=part.content_type)
+            if part.filename:
+                self.p_out(f'- Filename: {part.filename}', indent=1)
+            if part.encoding:
+                self.p_out(f'- Encoding: {part.encoding}', indent=1)
+            self.p_out(f'- Size: {part.size}B', indent=1)
+            self.p_out(f'- Headers:', indent=1)
+            for key, value in part.headers.items():
+                self.p_out(f'{key}: {value}', indent=4)
+            self.p_out(f'- Content:', indent=1)
+            if isinstance(part, aiohttp.payload.BufferedReaderPayload):
+                print(f'{Style.DIM}Contents of "{part._value.name}"')
             else:
-                self.p_text(request_context.data)
+                print(self.highlight_content(part.content_type, part._value))
+
+    def get_request_data(self, request_context):
+        if hasattr(request_context, 'json'):
+            return json.dumps(request_context.json)
+        elif hasattr(request_context, 'data') and request_context.data:
+            return request_context.data
+
+    def get_request_content_type(self, response):
+        return response.request_info.headers.get('content-type')
+
+    async def print_request_data(self, response, request_context):
+        data = self.get_request_data(request_context)
+        if data:
+            content_type = self.get_request_content_type(response)
+            self.p_out_h1('Request data', sup=content_type)
+            if isinstance(data, aiohttp.multipart.MultipartWriter):
+                self.print_multipart_request_data(data)
+            else:
+                print(self.highlight_content(content_type, data))
 
     async def on_request_end(self, session, trace_ctx, params): # pylint: disable=W0613
         response = params.response
