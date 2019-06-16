@@ -2,7 +2,7 @@
 name: Feature request
 about: Suggest an idea for DBGR
 title: ''
-labels: enhancement, question
+labels: enhancement, triage
 assignees: ''
 
 ---

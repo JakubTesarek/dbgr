@@ -2,7 +2,7 @@
 name: Bug report
 about: Create a report to help us improve
 title: ''
-labels: bug, question
+labels: bug, triage
 assignees: ''
 
 ---
@@ -15,7 +15,7 @@ A clear and concise description of what the bug is.
 *If applicable, include the environment file and module with requests. (**remove or obfuscate all sensitive data**).
 * If the problem is caused by response from server that is  not publicly available or requires authentication, also include the response so the person fixing the bug can mock the server response.
 
-**Expected behavior**
+**Expected behaviour**
 A clear and concise description of what you expected to happen.
 
 ** Please complete the following information **
