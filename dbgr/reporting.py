@@ -114,7 +114,9 @@ class Reporter():
         return data.strip()
 
     def get_response_content_type(self, response):
-        return response.headers.get('content-type')
+        header = response.headers.get('content-type')
+        value, _ = cgi.parse_header(header)
+        return value
 
     async def print_response(self, response):
         content_type = self.get_response_content_type(response)
@@ -160,7 +162,9 @@ class Reporter():
         return data
 
     def get_request_content_type(self, response):
-        return response.request_info.headers.get('content-type')
+        header = response.request_info.headers.get('content-type')
+        value, _ = cgi.parse_header(header)
+        return value
 
     async def print_request_data(self, response, request_context):
         data = self.get_request_data(request_context)
