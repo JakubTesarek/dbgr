@@ -26,3 +26,6 @@ test:
 
 documentation:
 	cd docs && $(MAKE) html
+
+spelling:
+	cd docs && $(MAKE) spelling

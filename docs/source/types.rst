@@ -27,7 +27,7 @@ To specify a type of an argument, use Pythons build in `type hinting`_:
 Primitive Types
 ---------------
 DBGR supports these primitive types: ``int``, ``float`` and ``str``. (Type
-``bool`` is decribed in :ref:`separate section<boolean_type>`)
+``bool`` is described in :ref:`separate section<boolean_type>`)
 
 .. _boolean_type:
 
@@ -36,7 +36,7 @@ Boolean Type
 When you specify an argument or return value to be a ``bool``, DBGR will convert these
 values (and their variants in different case) to ``False``: ``False``, ``0``, ``"f"``,
 ``"false"``, ``"n"``, ``"no"``. Also all objects implementing ``__bool__`` method will
-be converted to the return value of that method. For example, empty colletion will
+be converted to the return value of that method. For example, empty collection will
 convert to ``False``. All other values will be converted to ``True``.
 
 .. code-block:: python
@@ -57,7 +57,7 @@ DBGR will hide the value you are typing. Also the secret return value of a reque
 printed as obfuscated in the terminal.
 
 .. warning::
-    DBGR will not obfuscate the value if it appears somewhere in request log, eg. headers.*
+    DBGR will not obfuscate the value if it appears somewhere in request log, e.g. headers.*
 
 .. code-block:: python
 

@@ -14,7 +14,7 @@ DBGR: HTTP client that gives you full control
 .. |Documentation Status| image:: https://readthedocs.org/projects/dbgr/badge/?version=latest
    :target: https://dbgr.readthedocs.io/en/latest/?badge=latest
 
-Dbgr [read 'ˌdiːˈbʌɡər'] is a interactive terminal tool to test and debug HTTP APIs.
+Dbgr [read ``'ˌdiːˈbʌɡər'``] is a interactive terminal tool to test and debug HTTP APIs.
 It offers alternative to Postman_, Insomnia_ and other HTTP clients. It is designed
 for programmers that prefer to use code instead of graphical tools and want full control
 over their HTTP requests.
@@ -141,7 +141,7 @@ To execute it, run ``dbgr request get_example``:
 
 .. tip::
     Example outputs in this documentation are shortened for readability.
-    Output from DBGR on your computer will containt the whole response.
+    Output from DBGR on your computer will contain the whole response.
 
 .. toctree::
     :maxdepth: 2
@@ -158,7 +158,7 @@ To execute it, run ``dbgr request get_example``:
     terminal-interface
     help
     contributing
-    licence
+    license
 
 
 Indices and tables

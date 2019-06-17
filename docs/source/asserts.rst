@@ -1,7 +1,7 @@
 .. _asserts:
 
-Aserts
-======
+Asserts
+=======
 
 DBGR supports assertions in requests. If an assert fails, it will get reported to the terminal.
 

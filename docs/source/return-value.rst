@@ -17,7 +17,7 @@ Secret Return Value
 If your request returns :ref:`secret_type`, it will be obfuscated in the terminal output:
 
 .. warning::
-    DBGR will not obfuscate the value if it appears somewhere in request log, eg. headers.*
+    DBGR will not obfuscate the value if it appears somewhere in request log, e.g. headers.*
 
 .. code-block:: python
 

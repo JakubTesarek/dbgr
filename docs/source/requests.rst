@@ -4,7 +4,7 @@ Requests
 ========
 
 Request is a coroutine decorated with ``@dbgr.requests``. DBGR searches all ``.py``
-files in currect directory and register all requests. You can check which requests
+files in current directory and register all requests. You can check which requests
 DBGR sees by running ``dbgr list``:
 
 .. code-block:: python

@@ -1,6 +1,16 @@
 Changelog
 =========
 
+[Unreleased]
+------------
+Added
+~~~~~
+- Added spell-checker for documentation
+
+Fixed
+~~~~~
+- Fixed spelling mistakes in documentation
+
 
 [1.2.0] - 2019-06-16
 --------------------

@@ -7,8 +7,8 @@ want to do. For example, to download user data, you need to login first. You can
 that by using coroutine :func:`dbgr.response`.
 
 .. warning::
-    DBGR doesn't detect or prevent reccursion. Be carefull not to unintentionaly
-    cause DDoS on your (or someone elses) servers.
+    DBGR doesn't detect or prevent recursion. Be careful not to unintentionally
+    cause DDoS on your (or someone else's) servers.
 
 Response accepts one required argument - the name of the request to execute as
 string:
@@ -17,7 +17,7 @@ string:
 
     Coroutine to make recursive requests.
 
-    All kwarg arguments will be mapped to arguments required by target request.
+    All kwargs will be mapped to arguments required by target request.
     Kwargs that are not required by target request will be ignored.
 
     :param str request_name:
@@ -25,7 +25,7 @@ string:
 
     :param configparser.ConfigParser environment:
         Instance of :class:`configparser.ConfigParser` with loaded environment variables.
-        Pass this argument only if you want to call request with environmnent different
+        Pass this argument only if you want to call request with environment different
         from current one. (optional)
 
     :param aiohttp.ClientSession session:

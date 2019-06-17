@@ -1,6 +1,6 @@
-.. _licence:
+.. _license:
 
-Licence
+License
 =======
 Copyright 2019 Jakub Tesárek
 

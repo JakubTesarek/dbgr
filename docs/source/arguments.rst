@@ -6,7 +6,7 @@ Arguments
 Environment and Session
 -----------------------
 In the example requests above, the requests we created accepted two arguments:
-``env`` and ``session``. Env is a instance of ``configparser.ConfigParser`` created
+``env`` and ``session``. ``Env`` is a instance of ``configparser.ConfigParser`` created
 from your environment file.  Session is instance of ``aiohttp.ClientSession``.
 
 Both of those arguments are optional, you can write requests that don't need them.
@@ -157,7 +157,7 @@ type will be ignored.
 
 Order of Precedence of Arguments
 --------------------------------
-There is many way to specify value for arguments. It's important to understant in
+There is many way to specify value for arguments. It's important to understand in
 which order they get resolved.
 
 1. First DBGR will take all the values specified with ``--arg`` in ``dbgr r`` command and assigns them.

@@ -9,8 +9,8 @@ Development setup
 If you want to develop debugger locally, there is an alternative installation process
 that will make this experience easier.
 
-First, `fork DBGR repository`_. Then you can clone the forked repo and create local
-environment:
+First, `fork DBGR repository`_. Then you can clone the forked repository and create
+local environment:
 
 .. _`fork DBGR repository`: https://help.github.com/en/articles/fork-a-repo
 
@@ -43,7 +43,7 @@ This will run all unit-tests and generate coverage report. 100% test coverage is
 mandatory.
 
 .. tip::
-    The file ``Makefile`` contains other commands that can be usefull when developing
+    The file ``Makefile`` contains other commands that can be useful when developing
     DBGR. Run ``make`` to see all the available commands.
 
 Linting
@@ -63,12 +63,21 @@ This documentation was build using Sphinx_. To build it locally, run:
 
 .. _sphinx: http://www.sphinx-doc.org/en/master/
 
-All new features and changes have to be documented.
-
 .. code-block:: bash
 
     (env3.7) $ make documentation
     (env3.7) $ open open docs/build/html/index.html
+
+All new features and changes have to be documented.
+
+Before committing please spell-check the documentation using:
+
+.. code-block:: bash
+
+    (env3.7) $ make spelling
+
+If Sphinx reports a spelling mistake on a word you are sure is spelled correctly,
+add it to ``docs/source/spelling.txt``. Sort the file alphabetically.
 
 Building distribution
 ---------------------
@@ -76,7 +85,7 @@ These steps are mandatory only when preparing for release. Individual developers
 need to worry about them.
 
 1. Run all tests, make sure they all pass and the code coverage is 100%.
-2. Move appropriet changes from ``# Unreleased`` section in ``CHANGELOG.rst`` to new version.
+2. Move appropriate changes from ``# Unreleased`` section in ``CHANGELOG.rst`` to new version.
 3. Change version in ``dbgr/meta.py``
 4. Build distribution, make sure there are no errors
 
@@ -84,8 +93,8 @@ need to worry about them.
 
         (env3.7) $ make build
 
-5. Tag new version on Github
-6. Create new `Github release`_
+5. Tag new version on GitHub
+6. Create new `GitHub release`_
 
     - Upload content of ``dist``
     - Copy latest changes from ``CHANGELOG.rst`` to release description

@@ -3,8 +3,11 @@
 Environment
 ===========
 Environments offer you different way to specify variables for your requests. Your
-default environment is placed in ``default.ini``. This is a file in ini format using
-ExtendedInterpolation_.
+default environment is placed in ``default.ini``. This is a file in `ini format`_
+using ExtendedInterpolation_.
+
+.. _extendedinterpolation: https://docs.python.org/3/library/configparser.html#configparser.ExtendedInterpolation).
+.. _`ini format`: https://docs.python.org/3/library/configparser.html
 
 .. code-block:: ini
 
@@ -21,12 +24,9 @@ ExtendedInterpolation_.
     [admin]
     url: ${DEFAULT:url}/admin
 
-
-.. _extendedinterpolation: https://docs.python.org/3/library/configparser.html#configparser.ExtendedInterpolation).
-
 When you execute a request, the current environment file get parsed and passed in
 variable ``env`` to your request coroutine. This allows you to test your request
-againts multiple environments, for example production and staging and observe if
+against multiple environments, for example production and staging and observe if
 they behave the same.
 
 You can change the environment that will be used with ``-e``/``--env`` switch. DBGR
