@@ -13,7 +13,7 @@ that by using coroutine :func:`dbgr.response`.
 Response accepts one required argument - the name of the request to execute as
 string:
 
-.. function:: dbgr.response(request_name, env=None, session=None, use_defaults=False, cache=True, \*\*kwargs)
+.. function:: dbgr.response(request_name, env=None, session=None, use_defaults=False, cache=True, silent=False, \*\*kwargs)
 
     Coroutine to make recursive requests.
 
@@ -41,6 +41,11 @@ string:
         Boolean flag if DBGR should use return value from cache, if available. Applicable
         only to requests with cache turned on. More about it in
         :ref:`Cache section<caching>`. (optional)
+
+    :param bool silent:
+        If set to True recursive call (and all other recursive call in the tree bellow)
+        will not print any output. (optional)
+
 
 .. code-block:: python
 

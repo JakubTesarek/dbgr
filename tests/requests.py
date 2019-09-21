@@ -216,7 +216,25 @@ async def test_execute_request(monkeypatch, capsys, mocked_session, mocked_env):
         'request', mocked_env, mocked_session, True, 'session', arg1='val1', arg2='val2'
     )
     captured = capsys.readouterr()
-    assert escape_ansi(captured.out) == "Result (str):\n'result'\n"
+    assert escape_ansi(captured.out) == 'Result (str):\nresult\n'
+
+
+@pytest.mark.asyncio
+async def test_execute_silent_request(monkeypatch, capsys, mocked_session, mocked_env):
+    async def mocked_Request(environment, session, use_defaults, cache, kwargs):
+        assert environment == mocked_env
+        assert session == mocked_session
+        assert use_defaults == True
+        assert cache == 'session'
+        assert kwargs == {'arg1': 'val1'}
+        return Result('result', PrimitiveType(str))
+
+    monkeypatch.setattr(dbgr.requests, 'find_request', lambda _: mocked_Request)
+    assert 'result' == await execute_request(
+        'request', mocked_env, mocked_session, True, 'session', arg1='val1', silent=True
+    )
+    captured = capsys.readouterr()
+    assert escape_ansi(captured.out) == ''
 
 
 def test_access_module_and_name():

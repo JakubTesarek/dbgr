@@ -1,11 +1,12 @@
 Changelog
 =========
 
-[Unreleased]
+[1.3.0] 2019-09-21
 ------------
 Added
 ~~~~~
 - Added spell-checker for documentation
+- Possibility to hide output of recursive calls
 
 Fixed
 ~~~~~

@@ -9,6 +9,7 @@ from dbgr.session import get_session
 from dbgr.types import Type
 from dbgr.arguments import DefaultValueArgument, NoDefaultValueArgument
 from dbgr.results import Result
+from dbgr import reporting
 
 
 _REQUESTS = None
@@ -104,7 +105,9 @@ class Request:
                 key.add((name, value))
         return frozenset(key)
 
-    async def __call__(self, env, session, use_defaults=False, cache=True, kwargs=None): # pylint: disable=R0913
+    async def __call__( # pylint: disable=R0913
+            self, env, session, use_defaults=False, cache=True, silent=False,
+            kwargs=None):
         kwargs = {} if kwargs is None else kwargs
         arguments = self.resolve_arguments(env, session, use_defaults, kwargs)
         if self.cache:
@@ -163,15 +166,24 @@ def parse_cmd_arguments(args):
     return result
 
 
-async def execute_request(
-        request, env=None, session=None, use_defaults=False, cache=True, **kwargs):
-    env = env if env is not None else get_environment()
-    session = session if session is not None else get_session()
-    request = find_request(request)
-    result = await request(
-        env, session, use_defaults=use_defaults, cache=cache, kwargs=kwargs)
-    print(result)
-    return result.value
+async def execute_request( # pylint: disable=R0913
+        request, env=None, session=None, use_defaults=False, cache=True,
+        silent=False, **kwargs):
+    try:
+        orig_silent = reporting.SILENT
+        if silent:
+            reporting.SILENT = True
+        env = env if env is not None else get_environment()
+        session = session if session is not None else get_session()
+        request = find_request(request)
+        result = await request(
+            env, session, use_defaults=use_defaults, cache=cache,
+            kwargs=kwargs
+        )
+        reporting.report_result(result)
+        return result.value
+    finally:
+        reporting.SILENT = orig_silent
 
 
 def extract_module_name(module_path):

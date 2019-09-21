@@ -1,5 +1,8 @@
-from dbgr.reporting import Reporter, ProgressBar
+from dbgr import reporting
+from dbgr.reporting import Reporter, ProgressBar, report_result
+from dbgr.types import PrimitiveType
 import pytest
+from dbgr.results import Result
 from tests.conftest import MockedResponse, AiohttpParams, escape_ansi, MockedTraceContext
 import asyncio
 import re
@@ -247,7 +250,7 @@ async def test_reporter_print_request_binary(capsys, mocked_session):
         url='http://example.com',
         request={'headers':{'Content-Type': 'application/octet-stream'}}
     )
-    ctx = MockedTraceContext(data=b'binary data')
+    ctx = MockedTraceContext(data=b'binary')
     await Reporter().on_request_end(mocked_session, ctx, AiohttpParams(res))
     captured = capsys.readouterr()
     assert escape_ansi(captured.out) == '''> GET http://example.com
@@ -257,7 +260,7 @@ async def test_reporter_print_request_binary(capsys, mocked_session):
 >  Content-Type: application/octet-stream
 >
 > Request data (application/octet-stream):
-b'binary data'
+<binary data>
 <
 < Response headers:
 <  Content-Type: text/plain
@@ -306,8 +309,8 @@ async def test_reporter_print_request_multipart(capsys, mocked_session):
 >  - Encoding: utf-8
 >  - Size: 105B
 >  - Headers:
->     content-type: application/json
 >     content-disposition: form-data;name=metadata
+>     content-type: application/json
 >     Content-Length: 105
 >  - Content:
 {{
@@ -317,20 +320,20 @@ async def test_reporter_print_request_multipart(capsys, mocked_session):
   "date": "2019-04-16",
   "expense_type": "OTHER"
 }}
->  receipt (image/jpeg):
+>  receipt (application/octet-stream):
 >  - Size: 18B
 >  - Headers:
 >     content-type: image/jpeg
 >     content-disposition: form-data;name=receipt
 >     Content-Length: 18
 >  - Content:
-b'this is not a jpeg'
+<binary data>
 >  # Part (text/x-python):
 >  - Filename: reporting.py
 >  - Size: {os.path.getsize(__file__)}B
 >  - Headers:
->     Content-Type: text/x-python
 >     Content-Disposition: attachment; filename="{os.path.basename(__file__)}"; filename*=utf-8''{os.path.basename(__file__)}
+>     Content-Type: text/x-python
 >     Content-Length: {os.path.getsize(__file__)}
 >  - Content:
 Contents of "{__file__}"
@@ -341,3 +344,80 @@ Contents of "{__file__}"
 < Response data (text/plain):
 
 '''
+
+
+@pytest.mark.asyncio
+async def test_reporter_print_long_request_headers(capsys, mocked_session):
+    res = MockedResponse(
+        headers={'Content-Type': 'text/plain'},
+        url='http://example.com',
+        request={'headers': {
+            'key': 'x' * 1000,
+            'Content-Type': 'text/plain'
+        }}
+    )
+    ctx = MockedTraceContext()
+    await Reporter().on_request_end(mocked_session, ctx, AiohttpParams(res))
+    captured = capsys.readouterr()
+    assert escape_ansi(captured.out) == f'''> GET http://example.com
+> 200 OK
+>
+> Request headers:
+>  key: {'x' * 100 + ' [...]'}
+>  Content-Type: text/plain
+<
+< Response headers:
+<  Content-Type: text/plain
+<
+< Response data (text/plain):
+
+'''
+
+
+@pytest.mark.asyncio
+async def test_reporter_silent_mode(capsys, mocked_session, monkeypatch):
+    monkeypatch.setattr(reporting, 'SILENT', True)
+    res = MockedResponse(
+        headers={'Content-Type': 'text/plain'},
+        url='http://example.com',
+        request={'headers': {
+            'Content-Type': 'text/plain'
+        }}
+    )
+    ctx = MockedTraceContext()
+    await Reporter().on_request_end(mocked_session, ctx, AiohttpParams(res))
+    captured = capsys.readouterr()
+    assert captured.out == ''
+
+
+@pytest.mark.asyncio
+async def test_report_result_silent(capsys, monkeypatch):
+    monkeypatch.setattr(reporting, 'SILENT', True)
+    r = Result('3.14', PrimitiveType(float))
+    report_result(r)
+    captured = capsys.readouterr()
+    assert captured.out == ''
+
+
+@pytest.mark.asyncio
+async def test_report_result(capsys):
+    r = Result('3.14', PrimitiveType(float))
+    report_result(r)
+    captured = capsys.readouterr()
+    assert escape_ansi(captured.out) == 'Result (float):\n3.14\n'
+
+
+@pytest.mark.asyncio
+async def test_report_result_none(capsys):
+    r = Result(None)
+    report_result(r)
+    captured = capsys.readouterr()
+    assert escape_ansi(captured.out) == 'Result (NoneType)\n'
+
+
+@pytest.mark.asyncio
+async def test_report_cached_result(capsys):
+    r = Result('3.14', PrimitiveType(float), True)
+    report_result(r)
+    captured = capsys.readouterr()
+    assert escape_ansi(captured.out) == 'Result (float, from cache):\n3.14\n'

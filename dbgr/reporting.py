@@ -9,6 +9,7 @@ from pygments.util import ClassNotFound as LexerNotFound
 from pygments.formatters import TerminalFormatter # pylint: disable=E0611
 from colorama import Style, Fore
 
+SILENT = False
 
 class ProgressBar():
     def __init__(self):
@@ -106,6 +107,8 @@ class Reporter():
     def highlight_content(self, mime, data):
         if mime.startswith('application/json'):
             data = json.dumps(json.loads(data), sort_keys=True, indent=2)
+        elif mime.startswith('application/octet-stream'):
+            data = '<binary data>'
         try:
             lexer = lexers.get_lexer_for_mimetype(mime)
             data = highlight(data, lexer, TerminalFormatter())
@@ -118,7 +121,7 @@ class Reporter():
         return value
 
     def get_response_content_type(self, response):
-        return self.parse_content_type(response.headers.get('content-type'))
+        return self.parse_content_type(response.headers.get('content-type', ''))
 
     async def print_response(self, response):
         content_type = self.get_response_content_type(response)
@@ -132,6 +135,8 @@ class Reporter():
     async def print_request_headers(self, response):
         self.p_out_h1('Request headers')
         for name, value in response.request_info.headers.items():
+            if len(value) > 100:
+                value = value[0:100] + ' [...]'
             self.p_out(f'{name}: {value}', indent=1)
 
     def get_part_name(self, part):
@@ -139,7 +144,7 @@ class Reporter():
         return params.get('name', '# Part')
 
     def print_multipart_request_data(self, data):
-        for part, _, __ in data:
+        for part, *_ in data:
             self.p_out_h2(self.get_part_name(part), sup=part.content_type)
             if part.filename:
                 self.p_out(f'- Filename: {part.filename}', indent=1)
@@ -178,10 +183,25 @@ class Reporter():
                 print(self.highlight_content(content_type, data))
 
     async def on_request_end(self, session, trace_ctx, params): # pylint: disable=W0613
-        response = params.response
-        await self.print_request(response)
-        await self.print_info(response)
-        await self.print_request_headers(response)
-        await self.print_request_data(response, trace_ctx.trace_request_ctx)
-        await self.print_response_headers(response)
-        await self.print_response(response)
+        if not SILENT:
+            response = params.response
+            await self.print_request(response)
+            await self.print_info(response)
+            await self.print_request_headers(response)
+            await self.print_request_data(response, trace_ctx.trace_request_ctx)
+            await self.print_response_headers(response)
+            await self.print_response(response)
+
+
+def report_result(result):
+    if not SILENT:
+        from_cache = ''
+        if result.cached:
+            from_cache = ', from cache'
+        buffer = (
+            f'{Style.BRIGHT}Result{Style.RESET_ALL} '
+            f'{Style.DIM}({type(result.value).__name__}{from_cache})'
+        )
+        if result.value is not None:
+            buffer += f'{Style.RESET_ALL}:\n{str(result)}'
+        print(buffer)
