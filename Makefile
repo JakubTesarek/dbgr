@@ -1,5 +1,11 @@
 all:
-	@echo 'make clean | build | publish | test | documentation'
+	@echo 'make version | clean | build | publish | test | documentation'
+
+version:
+	echo Python versions
+	python --version
+	echo Dependecies versions
+	pip list
 
 clean:
 	rm -rf *.pyc __pycache__
